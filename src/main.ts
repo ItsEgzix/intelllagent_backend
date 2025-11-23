@@ -6,6 +6,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 
+let app: NestExpressApplication;
+
 async function bootstrap() {
   // Ensure uploads directory exists
   const uploadsDir = join(process.cwd(), 'uploads', 'avatars');
@@ -13,7 +15,7 @@ async function bootstrap() {
     mkdirSync(uploadsDir, { recursive: true });
   }
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Enable CORS for frontend
   app.enableCors({
@@ -46,6 +48,22 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3001);
+  await app.init();
+  return app;
 }
-bootstrap();
+
+// For Vercel serverless
+export const handler = async (req: any, res: any) => {
+  if (!app) {
+    app = await bootstrap();
+  }
+  const expressApp = app.getHttpAdapter().getInstance();
+  return expressApp(req, res);
+};
+
+// For local development
+if (require.main === module) {
+  bootstrap().then((appInstance) => {
+    appInstance.listen(process.env.PORT ?? 3001);
+  });
+}
