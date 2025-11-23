@@ -7,6 +7,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { ChatbotService } from './chatbot.service';
 import { SendMessageDto } from './dto/send-message.dto';
@@ -18,32 +19,63 @@ export class ChatbotController {
   @Post('message')
   @HttpCode(HttpStatus.OK)
   async sendMessage(@Body() sendMessageDto: SendMessageDto) {
-    const { message, sessionId } = sendMessageDto;
-    return this.chatbotService.sendMessage(message, sessionId);
+    try {
+      const { message, sessionId } = sendMessageDto;
+      return await this.chatbotService.sendMessage(message, sessionId);
+    } catch (error) {
+      console.error('Error in sendMessage:', error);
+      throw new HttpException(
+        error instanceof Error ? error.message : 'Failed to process message',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Get('sessions/:sessionId/history')
   async getSessionHistory(@Param('sessionId') sessionId: string) {
-    const history = this.chatbotService.getSessionHistory(sessionId);
-    if (!history) {
-      return { error: 'Session not found' };
+    try {
+      const history = this.chatbotService.getSessionHistory(sessionId);
+      if (!history) {
+        return { error: 'Session not found' };
+      }
+      return { sessionId, history };
+    } catch (error) {
+      console.error('Error in getSessionHistory:', error);
+      throw new HttpException(
+        'Failed to get session history',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-    return { sessionId, history };
   }
 
   @Delete('sessions/:sessionId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async clearSession(@Param('sessionId') sessionId: string) {
-    const deleted = this.chatbotService.clearSession(sessionId);
-    if (!deleted) {
-      return { error: 'Session not found' };
+    try {
+      const deleted = this.chatbotService.clearSession(sessionId);
+      if (!deleted) {
+        return { error: 'Session not found' };
+      }
+      return { message: 'Session cleared' };
+    } catch (error) {
+      console.error('Error in clearSession:', error);
+      throw new HttpException(
+        'Failed to clear session',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-    return { message: 'Session cleared' };
   }
 
   @Get('sessions')
   async getAllSessions() {
-    return this.chatbotService.getAllSessions();
+    try {
+      return this.chatbotService.getAllSessions();
+    } catch (error) {
+      console.error('Error in getAllSessions:', error);
+      throw new HttpException(
+        'Failed to get sessions',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
-

@@ -30,8 +30,14 @@ export class ChatbotService implements OnModuleInit {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       console.warn('GEMINI_API_KEY not found in environment variables');
+      // Don't throw error, just log warning - service will throw when used
     } else {
-      this.genAI = new GoogleGenAI({ apiKey });
+      try {
+        this.genAI = new GoogleGenAI({ apiKey });
+      } catch (error) {
+        console.error('Failed to initialize GoogleGenAI:', error);
+        // Don't throw, will be handled in sendMessage
+      }
     }
   }
 
@@ -44,29 +50,45 @@ export class ChatbotService implements OnModuleInit {
    */
   private async loadRAGContext(): Promise<void> {
     try {
+      // In serverless environments, file paths might be different
       const possiblePaths = [
         path.join(process.cwd(), 'src', 'chatbot', 'context.md'),
         path.join(process.cwd(), 'context.md'),
         path.join(process.cwd(), 'data', 'context.md'),
+        path.join(__dirname, 'context.md'), // Add __dirname as fallback
       ];
 
       let contextPath: string | null = null;
       for (const possiblePath of possiblePaths) {
-        if (fs.existsSync(possiblePath)) {
-          contextPath = possiblePath;
-          break;
+        try {
+          if (fs.existsSync(possiblePath)) {
+            contextPath = possiblePath;
+            break;
+          }
+        } catch (err) {
+          // Continue to next path if this one fails
+          continue;
         }
       }
 
       if (contextPath) {
-        this.ragContext = fs.readFileSync(contextPath, 'utf-8');
-        console.log(`RAG context loaded from: ${contextPath}`);
+        try {
+          this.ragContext = fs.readFileSync(contextPath, 'utf-8');
+          console.log(`RAG context loaded from: ${contextPath}`);
+        } catch (readError) {
+          console.warn(
+            `Failed to read context file from ${contextPath}:`,
+            readError,
+          );
+          this.ragContext = '';
+        }
       } else {
         console.warn('No context.md file found. RAG will not be available.');
         this.ragContext = '';
       }
     } catch (error) {
       console.error('Error loading RAG context:', error);
+      // Don't fail the service if RAG context can't be loaded
       this.ragContext = '';
     }
   }
@@ -137,6 +159,10 @@ Based on the context above, answer the user's questions. If the question is not 
    */
   private async getAvailableAgents(): Promise<string> {
     try {
+      if (!this.agentsService) {
+        return 'Agent service is not available. Please try again later.';
+      }
+
       const agents = await this.agentsService.findActive();
       if (agents.length === 0) {
         return 'No agents are currently available.';
@@ -152,7 +178,7 @@ Based on the context above, answer the user's questions. If the question is not 
       return `Available agents:\n${agentsList}\n\nWhen scheduling, you can specify the agent by name or email.`;
     } catch (error) {
       console.error('Error fetching agents:', error);
-      return 'Unable to fetch available agents at this time.';
+      return 'Unable to fetch available agents at this time. Please try again later.';
     }
   }
 
@@ -235,6 +261,10 @@ Based on the context above, answer the user's questions. If the question is not 
     nameOrEmail: string,
   ): Promise<string | null> {
     try {
+      if (!this.agentsService) {
+        return null;
+      }
+
       const agents = await this.agentsService.findActive();
       const agent = agents.find(
         (a) =>
@@ -262,6 +292,10 @@ Based on the context above, answer the user's questions. If the question is not 
     agentName?: string; // Allow agent selection by name/email
   }): Promise<string> {
     try {
+      if (!this.meetingsService || !this.agentsService) {
+        return 'Meeting service is not available. Please try again later.';
+      }
+
       // Validate date format
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(params.date)) {
@@ -344,8 +378,16 @@ Based on the context above, answer the user's questions. If the question is not 
   ): Promise<{ response: string; sessionId: string }> {
     if (!this.genAI) {
       throw new Error(
-        'Gemini API is not configured. Please set GEMINI_API_KEY.',
+        'Gemini API is not configured. Please set GEMINI_API_KEY environment variable.',
       );
+    }
+
+    if (
+      !message ||
+      typeof message !== 'string' ||
+      message.trim().length === 0
+    ) {
+      throw new Error('Message cannot be empty');
     }
 
     const session = this.getOrCreateSession(sessionId);

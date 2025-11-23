@@ -63,10 +63,15 @@ let ChatbotService = class ChatbotService {
         this.agentsService = agentsService;
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
-            console.warn(...oo_tr(`789105979_32_6_32_71_8`, 'GEMINI_API_KEY not found in environment variables'));
+            console.warn(...oo_tr(`2510647180_32_6_32_71_8`, 'GEMINI_API_KEY not found in environment variables'));
         }
         else {
-            this.genAI = new genai_1.GoogleGenAI({ apiKey });
+            try {
+                this.genAI = new genai_1.GoogleGenAI({ apiKey });
+            }
+            catch (error) {
+                console.error(...oo_tx(`2510647180_38_8_38_65_11`, 'Failed to initialize GoogleGenAI:', error));
+            }
         }
     }
     async onModuleInit() {
@@ -78,25 +83,37 @@ let ChatbotService = class ChatbotService {
                 path.join(process.cwd(), 'src', 'chatbot', 'context.md'),
                 path.join(process.cwd(), 'context.md'),
                 path.join(process.cwd(), 'data', 'context.md'),
+                path.join(__dirname, 'context.md'),
             ];
             let contextPath = null;
             for (const possiblePath of possiblePaths) {
-                if (fs.existsSync(possiblePath)) {
-                    contextPath = possiblePath;
-                    break;
+                try {
+                    if (fs.existsSync(possiblePath)) {
+                        contextPath = possiblePath;
+                        break;
+                    }
+                }
+                catch (err) {
+                    continue;
                 }
             }
             if (contextPath) {
-                this.ragContext = fs.readFileSync(contextPath, 'utf-8');
-                console.log(...oo_oo(`789105979_63_8_63_62_4`, `RAG context loaded from: ${contextPath}`));
+                try {
+                    this.ragContext = fs.readFileSync(contextPath, 'utf-8');
+                    console.log(...oo_oo(`2510647180_77_10_77_64_4`, `RAG context loaded from: ${contextPath}`));
+                }
+                catch (readError) {
+                    console.warn(...oo_tr(`2510647180_79_10_82_11_8`, `Failed to read context file from ${contextPath}:`, readError));
+                    this.ragContext = '';
+                }
             }
             else {
-                console.warn(...oo_tr(`789105979_65_8_65_76_8`, 'No context.md file found. RAG will not be available.'));
+                console.warn(...oo_tr(`2510647180_86_8_86_76_8`, 'No context.md file found. RAG will not be available.'));
                 this.ragContext = '';
             }
         }
         catch (error) {
-            console.error(...oo_tx(`789105979_69_6_69_56_11`, 'Error loading RAG context:', error));
+            console.error(...oo_tx(`2510647180_90_6_90_56_11`, 'Error loading RAG context:', error));
             this.ragContext = '';
         }
     }
@@ -153,6 +170,9 @@ Based on the context above, answer the user's questions. If the question is not 
     }
     async getAvailableAgents() {
         try {
+            if (!this.agentsService) {
+                return 'Agent service is not available. Please try again later.';
+            }
             const agents = await this.agentsService.findActive();
             if (agents.length === 0) {
                 return 'No agents are currently available.';
@@ -163,8 +183,8 @@ Based on the context above, answer the user's questions. If the question is not 
             return `Available agents:\n${agentsList}\n\nWhen scheduling, you can specify the agent by name or email.`;
         }
         catch (error) {
-            console.error(...oo_tx(`789105979_154_6_154_52_11`, 'Error fetching agents:', error));
-            return 'Unable to fetch available agents at this time.';
+            console.error(...oo_tx(`2510647180_180_6_180_52_11`, 'Error fetching agents:', error));
+            return 'Unable to fetch available agents at this time. Please try again later.';
         }
     }
     validateWorkingHours(date, time, timezone) {
@@ -206,7 +226,7 @@ Based on the context above, answer the user's questions. If the question is not 
             return { valid: true };
         }
         catch (error) {
-            console.error(...oo_tx(`789105979_222_6_222_61_11`, 'Error validating working hours:', error));
+            console.error(...oo_tx(`2510647180_248_6_248_61_11`, 'Error validating working hours:', error));
             return {
                 valid: false,
                 message: 'Error validating working hours. Please check the date and time format.',
@@ -215,18 +235,24 @@ Based on the context above, answer the user's questions. If the question is not 
     }
     async findAgentByNameOrEmail(nameOrEmail) {
         try {
+            if (!this.agentsService) {
+                return null;
+            }
             const agents = await this.agentsService.findActive();
             const agent = agents.find((a) => a.name?.toLowerCase() === nameOrEmail.toLowerCase() ||
                 a.email.toLowerCase() === nameOrEmail.toLowerCase());
             return agent ? agent.id : null;
         }
         catch (error) {
-            console.error(...oo_tx(`789105979_246_6_246_50_11`, 'Error finding agent:', error));
+            console.error(...oo_tx(`2510647180_276_6_276_50_11`, 'Error finding agent:', error));
             return null;
         }
     }
     async scheduleMeeting(params) {
         try {
+            if (!this.meetingsService || !this.agentsService) {
+                return 'Meeting service is not available. Please try again later.';
+            }
             const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
             if (!dateRegex.test(params.date)) {
                 return 'Invalid date format. Please use YYYY-MM-DD format (e.g., 2024-12-25).';
@@ -275,14 +301,19 @@ Based on the context above, answer the user's questions. If the question is not 
             return `Meeting scheduled successfully${agentInfo}!\n\nDetails:\n- Date: ${meeting.customerDate}\n- Time: ${meeting.customerTime} (${meeting.customerTimezone})\n- Confirmation email sent to ${params.email}`;
         }
         catch (error) {
-            console.error(...oo_tx(`789105979_334_6_334_55_11`, 'Error scheduling meeting:', error));
+            console.error(...oo_tx(`2510647180_368_6_368_55_11`, 'Error scheduling meeting:', error));
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             return `Failed to schedule meeting: ${errorMessage}`;
         }
     }
     async sendMessage(message, sessionId) {
         if (!this.genAI) {
-            throw new Error('Gemini API is not configured. Please set GEMINI_API_KEY.');
+            throw new Error('Gemini API is not configured. Please set GEMINI_API_KEY environment variable.');
+        }
+        if (!message ||
+            typeof message !== 'string' ||
+            message.trim().length === 0) {
+            throw new Error('Message cannot be empty');
         }
         const session = this.getOrCreateSession(sessionId);
         try {
@@ -473,7 +504,7 @@ Based on the context above, answer the user's questions. If the question is not 
             throw new Error('No response text generated');
         }
         catch (error) {
-            console.error(...oo_tx(`789105979_585_6_585_55_11`, 'Error calling Gemini API:', error));
+            console.error(...oo_tx(`2510647180_627_6_627_55_11`, 'Error calling Gemini API:', error));
             throw new Error(`Failed to get response: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
