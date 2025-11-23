@@ -1,0 +1,156 @@
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  BadRequestException,
+} from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
+import { CreateMeetingDto } from './dto/create-meeting.dto';
+import { EmailService } from '../email/email.service';
+import { convertTimezone } from '../email/templates/timezone-helper';
+
+@Injectable()
+export class MeetingsService implements OnModuleInit, OnModuleDestroy {
+  private prisma = new PrismaClient();
+
+  constructor(private emailService: EmailService) {}
+
+  async onModuleInit() {
+    await this.prisma.$connect();
+  }
+
+  async onModuleDestroy() {
+    await this.prisma.$disconnect();
+  }
+
+  async create(createMeetingDto: CreateMeetingDto) {
+    // Step 1: Create or find customer
+    let customer = await this.prisma.customer.findUnique({
+      where: { email: createMeetingDto.email },
+    });
+
+    if (!customer) {
+      customer = await this.prisma.customer.create({
+        data: {
+          name: createMeetingDto.customerName,
+          email: createMeetingDto.email,
+          phone: createMeetingDto.phone,
+          timezone: createMeetingDto.timezone,
+        },
+      });
+    } else {
+      // Update customer info if it has changed
+      customer = await this.prisma.customer.update({
+        where: { id: customer.id },
+        data: {
+          name: createMeetingDto.customerName,
+          phone: createMeetingDto.phone,
+          timezone: createMeetingDto.timezone,
+        },
+      });
+    }
+
+    // Step 2: Calculate agent time if agent is assigned
+    let agentDate: string | null = null;
+    let agentTime: string | null = null;
+    let agentTimezone: string | null = null;
+
+    if (createMeetingDto.agentId) {
+      // Get agent to get their timezone
+      const agent = await this.prisma.user.findUnique({
+        where: { id: createMeetingDto.agentId },
+      });
+
+      if (!agent) {
+        throw new BadRequestException('Agent not found');
+      }
+
+      if (!agent.timezone) {
+        throw new BadRequestException('Agent timezone is not set');
+      }
+
+      // Convert customer time to agent time
+      const agentTimeResult = convertTimezone(
+        createMeetingDto.date,
+        createMeetingDto.time,
+        createMeetingDto.timezone,
+        agent.timezone,
+      );
+
+      agentDate = agentTimeResult.date;
+      agentTime = agentTimeResult.time;
+      agentTimezone = agent.timezone;
+
+      // Check if agent already has a meeting at this time (in agent's timezone)
+      const existingMeeting = await this.prisma.meeting.findFirst({
+        where: {
+          agentId: createMeetingDto.agentId,
+          agentDate: agentDate,
+          agentTime: agentTime,
+        },
+      });
+
+      if (existingMeeting) {
+        throw new BadRequestException(
+          'The selected agent already has a meeting scheduled at this time',
+        );
+      }
+    }
+
+    // Step 3: Create meeting with both customer and agent times
+    const meeting = await this.prisma.meeting.create({
+      data: {
+        customerId: customer.id,
+        customerDate: createMeetingDto.date,
+        customerTime: createMeetingDto.time,
+        customerTimezone: createMeetingDto.timezone,
+        agentId: createMeetingDto.agentId || null,
+        agentDate: agentDate,
+        agentTime: agentTime,
+        agentTimezone: agentTimezone,
+      },
+      include: {
+        customer: true,
+        agent: true,
+      },
+    });
+
+    // Send emails asynchronously (don't block the response)
+    this.sendMeetingEmails(meeting).catch((error) => {
+      console.error('Failed to send meeting emails:', error);
+    });
+
+    return meeting;
+  }
+
+  async findAll() {
+    const meetings = await this.prisma.meeting.findMany({
+      include: {
+        customer: true,
+        agent: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    return meetings;
+  }
+
+  private async sendMeetingEmails(meeting: any) {
+    const managementEmail = 'itsegzix@gmail.com';
+
+    // Send email to management
+    await this.emailService.sendMeetingNotificationToAdmin(
+      meeting,
+      managementEmail,
+    );
+
+    // Send email to agent if assigned
+    if (meeting.agent && meeting.agent.email) {
+      await this.emailService.sendMeetingNotificationToAgent(meeting);
+    }
+
+    // Send confirmation email to client
+    await this.emailService.sendMeetingConfirmationToClient(meeting);
+  }
+}

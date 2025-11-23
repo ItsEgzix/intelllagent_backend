@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Email {
+  id        String   @id @default(uuid())
+  email     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Customer {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  phone     String
+  timezone  String    // Customer's timezone
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  meetings  Meeting[] // Meetings for this customer
+}
+
+model Meeting {
+  id                String   @id @default(uuid())
+  // Customer's time
+  customerDate      String   // Date in customer's timezone (YYYY-MM-DD)
+  customerTime      String   // Time in customer's timezone (HH:mm)
+  customerTimezone  String   // Customer's timezone
+  // Agent's time
+  agentDate         String?  // Date in agent's timezone (YYYY-MM-DD)
+  agentTime         String?  // Time in agent's timezone (HH:mm)
+  agentTimezone     String?  // Agent's timezone
+  // Relations
+  customerId        String
+  customer          Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  agentId           String?  // References User.id (admin role users are agents)
+  agent             User?    @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String?
+  role      String    @default("admin") // "admin" or "superadmin"
+  isAgent   Boolean   @default(false) // Whether this user is an agent
+  timezone  String?   @default("Asia/Kuala_Lumpur") // Timezone for agents
+  avatar    String?   // URL or path to avatar image
+  isActive  Boolean   @default(true) // For agents to enable/disable
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  meetings  Meeting[] // Meetings assigned to this agent
+}
