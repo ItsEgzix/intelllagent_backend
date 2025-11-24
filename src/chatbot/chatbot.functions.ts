@@ -343,17 +343,28 @@ export async function handleFunctionCall(
       if (!targetLanguage) {
         return 'Language code is required. Please provide a valid ISO 639-1 language code (e.g., "fr", "es", "de").';
       }
-      const result = await translateWebsite(
-        targetLanguage,
-        services.geminiApiKey,
-      );
-      if (result.success) {
-        const languageName = getLanguageDisplayName(targetLanguage);
-        // Return a message that prompts the AI to set the locale
-        // The AI should automatically call set_locale after this
-        return `Website successfully translated to ${languageName} (${targetLanguage})! The translation file has been created and is now available. The website has been translated successfully. Now automatically switch the user's language to ${targetLanguage} by calling set_locale with locale="${targetLanguage}".`;
+      try {
+        const result = await translateWebsite(
+          targetLanguage,
+          services.geminiApiKey,
+        );
+        if (result.success) {
+          const languageName = getLanguageDisplayName(targetLanguage);
+          // Return a message that prompts the AI to set the locale
+          // The AI should automatically call set_locale after this
+          return `Website successfully translated to ${languageName} (${targetLanguage})! The translation file has been created and is now available. The website has been translated successfully. Now automatically switch the user's language to ${targetLanguage} by calling set_locale with locale="${targetLanguage}".`;
+        }
+        return `Translation failed: ${result.message}`;
+      } catch (error) {
+        console.error('Translation error:', error);
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        // Provide helpful error message
+        if (errorMessage.includes('Messages directory not found')) {
+          return `I am sorry, I was unable to translate the website because the translation files directory could not be found. This is a configuration issue. Please ensure the MESSAGES_DIRECTORY environment variable is set correctly, or that the messages folder exists in the expected location. Error: ${errorMessage}`;
+        }
+        return `Translation failed: ${errorMessage}. Please try again later or contact support if the issue persists.`;
       }
-      return `Translation failed: ${result.message}`;
     case 'set_locale':
       const locale = args.locale as string;
       if (!locale) {

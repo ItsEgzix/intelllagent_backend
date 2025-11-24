@@ -7,11 +7,11 @@ export declare class AuthController {
     register(registerDto: RegisterDto, req: any): Promise<{
         access_token: string;
         user: {
-            id: string;
             email: string;
             name: string | null;
-            role: string;
+            id: string;
             createdAt: Date;
+            role: string;
         };
     }>;
     login(loginDto: LoginDto): Promise<{
@@ -33,27 +33,27 @@ export declare class AuthController {
     }>;
     getProfile(req: any): Promise<any>;
     getAllUsers(): Promise<{
-        id: string;
         email: string;
         name: string | null;
-        role: string;
-        isAgent: boolean;
-        timezone: string | null;
-        avatar: string | null;
-        isActive: boolean;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
+        timezone: string | null;
+        role: string;
+        isAgent: boolean;
+        avatar: string | null;
+        isActive: boolean;
     }[]>;
     updateUser(id: string, body: any, file?: any): Promise<{
-        id: string;
         email: string;
         name: string | null;
-        role: string;
-        isAgent: boolean;
-        timezone: string | null;
-        avatar: string | null;
-        isActive: boolean;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
+        timezone: string | null;
+        role: string;
+        isAgent: boolean;
+        avatar: string | null;
+        isActive: boolean;
     }>;
 }

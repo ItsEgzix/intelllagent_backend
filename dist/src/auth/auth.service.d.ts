@@ -12,11 +12,11 @@ export declare class AuthService implements OnModuleInit, OnModuleDestroy {
     register(registerDto: RegisterDto, requestingUserRole?: string): Promise<{
         access_token: string;
         user: {
-            id: string;
             email: string;
             name: string | null;
-            role: string;
+            id: string;
             createdAt: Date;
+            role: string;
         };
     }>;
     login(loginDto: LoginDto): Promise<{
@@ -34,38 +34,38 @@ export declare class AuthService implements OnModuleInit, OnModuleDestroy {
         };
     }>;
     validateUser(userId: string): Promise<{
-        id: string;
         email: string;
         name: string | null;
+        id: string;
+        createdAt: Date;
+        timezone: string | null;
         role: string;
         isAgent: boolean;
-        timezone: string | null;
         avatar: string | null;
         isActive: boolean;
-        createdAt: Date;
     }>;
     findAllUsers(): Promise<{
-        id: string;
         email: string;
         name: string | null;
-        role: string;
-        isAgent: boolean;
-        timezone: string | null;
-        avatar: string | null;
-        isActive: boolean;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
+        timezone: string | null;
+        role: string;
+        isAgent: boolean;
+        avatar: string | null;
+        isActive: boolean;
     }[]>;
     updateUser(id: string, updateUserDto: UpdateUserDto): Promise<{
-        id: string;
         email: string;
         name: string | null;
-        role: string;
-        isAgent: boolean;
-        timezone: string | null;
-        avatar: string | null;
-        isActive: boolean;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
+        timezone: string | null;
+        role: string;
+        isAgent: boolean;
+        avatar: string | null;
+        isActive: boolean;
     }>;
 }

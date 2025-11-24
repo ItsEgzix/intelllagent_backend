@@ -16,23 +16,49 @@ interface TranslationOptions {
  * Get the path to the messages directory
  */
 function getMessagesDirectory(): string {
+  // First, try environment variable (for production deployments)
+  if (process.env.MESSAGES_DIRECTORY) {
+    const envPath = process.env.MESSAGES_DIRECTORY;
+    if (fs.existsSync(envPath)) {
+      return envPath;
+    }
+  }
+
   // Try multiple possible paths
   const possiblePaths = [
     path.join(process.cwd(), '..', 'intellagent-webapp', 'messages'),
     path.join(process.cwd(), 'intellagent-webapp', 'messages'),
     path.join(process.cwd(), 'messages'),
     path.join(__dirname, '..', '..', '..', 'intellagent-webapp', 'messages'),
+    // For Vercel/production: try absolute path from root
+    path.join(process.cwd(), '..', 'messages'),
+    // For monorepo structure
+    path.join(process.cwd(), '..', '..', 'intellagent-webapp', 'messages'),
   ];
 
   for (const possiblePath of possiblePaths) {
-    if (fs.existsSync(possiblePath)) {
-      return possiblePath;
+    try {
+      if (fs.existsSync(possiblePath)) {
+        return possiblePath;
+      }
+    } catch (error) {
+      // Continue to next path if this one fails
+      continue;
     }
   }
 
-  throw new Error(
-    'Messages directory not found. Please ensure the messages folder exists.',
-  );
+  // If no path found, try to create messages directory in current working directory
+  const fallbackPath = path.join(process.cwd(), 'messages');
+  try {
+    if (!fs.existsSync(fallbackPath)) {
+      fs.mkdirSync(fallbackPath, { recursive: true });
+    }
+    return fallbackPath;
+  } catch (error) {
+    throw new Error(
+      `Messages directory not found. Tried paths: ${possiblePaths.join(', ')}. Please set MESSAGES_DIRECTORY environment variable or ensure the messages folder exists. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
+  }
 }
 
 /**
@@ -52,18 +78,64 @@ export function readSourceTranslationFile(): any {
 
 /**
  * Write translated content to a target language file
+ * Tries to write via frontend API first (for production), falls back to direct file write
  */
-export function writeTranslationFile(languageCode: string, content: any): void {
-  const messagesDir = getMessagesDirectory();
-  const targetPath = path.join(messagesDir, `${languageCode}.json`);
+export async function writeTranslationFile(
+  languageCode: string,
+  content: any,
+): Promise<void> {
+  // First, try to write via frontend API (for production deployments)
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const apiSecret = process.env.TRANSLATION_API_SECRET;
 
-  // Ensure directory exists
-  if (!fs.existsSync(messagesDir)) {
-    fs.mkdirSync(messagesDir, { recursive: true });
+  if (frontendUrl && apiSecret) {
+    try {
+      const response = await fetch(
+        `${frontendUrl}/api/languages/${languageCode}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiSecret}`,
+          },
+          body: JSON.stringify(content),
+        },
+      );
+
+      if (response.ok) {
+        console.log(`Translation file for ${languageCode} saved via API`);
+        return;
+      } else {
+        console.warn(
+          `Failed to save translation via API (${response.status}), falling back to file system`,
+        );
+      }
+    } catch (error) {
+      console.warn(
+        `Error saving translation via API, falling back to file system:`,
+        error,
+      );
+    }
   }
 
-  // Write the translated content
-  fs.writeFileSync(targetPath, JSON.stringify(content, null, 2), 'utf-8');
+  // Fallback to direct file write (for local development or if API fails)
+  try {
+    const messagesDir = getMessagesDirectory();
+    const targetPath = path.join(messagesDir, `${languageCode}.json`);
+
+    // Ensure directory exists
+    if (!fs.existsSync(messagesDir)) {
+      fs.mkdirSync(messagesDir, { recursive: true });
+    }
+
+    // Write the translated content
+    fs.writeFileSync(targetPath, JSON.stringify(content, null, 2), 'utf-8');
+    console.log(`Translation file for ${languageCode} saved to file system`);
+  } catch (error) {
+    throw new Error(
+      `Failed to write translation file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
+  }
 }
 
 /**
@@ -163,12 +235,12 @@ export async function translateWebsite(
       apiKey,
     );
 
-    // Write the translated file
-    writeTranslationFile(targetLanguage, translatedContent);
+    // Write the translated file (now async)
+    await writeTranslationFile(targetLanguage, translatedContent);
 
-    // Update the language registry
+    // Update the language registry (now async)
     const languageName = getLanguageDisplayName(targetLanguage);
-    updateLanguageRegistry(targetLanguage, languageName, languageName);
+    await updateLanguageRegistry(targetLanguage, languageName, languageName);
 
     const messagesDir = getMessagesDirectory();
     const filePath = path.join(messagesDir, `${targetLanguage}.json`);
@@ -244,12 +316,85 @@ const DEFAULT_FRONTEND_LANGUAGES: LanguageRegistryEntry[] = [
   { code: 'ms', name: 'Bahasa Melayu', nameEn: 'Malay' },
 ];
 
-export function updateLanguageRegistry(
+export async function updateLanguageRegistry(
   languageCode: string,
   languageName: string,
   languageNameEn: string,
-): void {
+): Promise<void> {
   try {
+    const normalizedEntry: LanguageRegistryEntry = {
+      code: languageCode,
+      name: languageName || languageCode.toUpperCase(),
+      nameEn: languageNameEn || languageName || languageCode.toUpperCase(),
+    };
+
+    // First, try to update via frontend API (for production deployments)
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const apiSecret = process.env.TRANSLATION_API_SECRET;
+
+    if (frontendUrl && apiSecret) {
+      try {
+        // Fetch current registry
+        const currentRegistryResponse = await fetch(
+          `${frontendUrl}/api/languages/registry`,
+        );
+        let currentRegistry: LanguageRegistryEntry[] = [];
+
+        if (currentRegistryResponse.ok) {
+          const data = await currentRegistryResponse.json();
+          if (Array.isArray(data)) {
+            currentRegistry = data;
+          }
+        }
+
+        // Merge with default languages
+        if (currentRegistry.length === 0) {
+          currentRegistry = [...DEFAULT_FRONTEND_LANGUAGES];
+        }
+
+        const registryMap = new Map<string, LanguageRegistryEntry>();
+        currentRegistry.forEach((entry) => registryMap.set(entry.code, entry));
+        DEFAULT_FRONTEND_LANGUAGES.forEach((entry) => {
+          if (!registryMap.has(entry.code)) {
+            registryMap.set(entry.code, entry);
+          }
+        });
+        registryMap.set(normalizedEntry.code, normalizedEntry);
+
+        const updatedRegistry = Array.from(registryMap.values());
+
+        // Update via API
+        const updateResponse = await fetch(
+          `${frontendUrl}/api/languages/registry`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiSecret}`,
+            },
+            body: JSON.stringify(updatedRegistry),
+          },
+        );
+
+        if (updateResponse.ok) {
+          console.log(
+            `Language ${languageCode} added to runtime registry via API successfully.`,
+          );
+          return;
+        } else {
+          console.warn(
+            `Failed to update registry via API (${updateResponse.status}), falling back to file system`,
+          );
+        }
+      } catch (error) {
+        console.warn(
+          `Error updating registry via API, falling back to file system:`,
+          error,
+        );
+      }
+    }
+
+    // Fallback to direct file write (for local development or if API fails)
     const messagesDir = getMessagesDirectory();
     const registryPath = path.join(messagesDir, 'languages.json');
 
@@ -280,12 +425,6 @@ export function updateLanguageRegistry(
     if (registry.length === 0) {
       registry = [...DEFAULT_FRONTEND_LANGUAGES];
     }
-
-    const normalizedEntry: LanguageRegistryEntry = {
-      code: languageCode,
-      name: languageName || languageCode.toUpperCase(),
-      nameEn: languageNameEn || languageName || languageCode.toUpperCase(),
-    };
 
     const registryMap = new Map<string, LanguageRegistryEntry>();
     registry.forEach((entry) => registryMap.set(entry.code, entry));
