@@ -11,12 +11,9 @@ export declare class ChatbotService implements OnModuleInit {
     onModuleInit(): Promise<void>;
     private loadRAGContext;
     private getOrCreateSession;
+    private getFunctionDisplayName;
+    private processResponseRecursively;
     private generateSessionId;
-    private buildSystemPrompt;
-    private getAvailableAgents;
-    private validateWorkingHours;
-    private findAgentByNameOrEmail;
-    private scheduleMeeting;
     sendMessage(message: string, sessionId?: string): Promise<{
         response: string;
         sessionId: string;

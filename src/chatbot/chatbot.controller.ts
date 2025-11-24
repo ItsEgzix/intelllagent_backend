@@ -11,6 +11,10 @@ import {
 } from '@nestjs/common';
 import { ChatbotService } from './chatbot.service';
 import { SendMessageDto } from './dto/send-message.dto';
+import {
+  getAvailableLanguageFiles,
+  getLanguageDisplayNames,
+} from './chatbot.translations';
 
 @Controller('chat')
 export class ChatbotController {
@@ -74,6 +78,27 @@ export class ChatbotController {
       console.error('Error in getAllSessions:', error);
       throw new HttpException(
         'Failed to get sessions',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('languages')
+  async getAvailableLanguages() {
+    try {
+      const languages = getAvailableLanguageFiles();
+      const displayNames = getLanguageDisplayNames();
+
+      return {
+        languages: languages.map((code) => ({
+          code,
+          name: displayNames[code] || code.toUpperCase(),
+        })),
+      };
+    } catch (error) {
+      console.error('Error in getAvailableLanguages:', error);
+      throw new HttpException(
+        'Failed to get available languages',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

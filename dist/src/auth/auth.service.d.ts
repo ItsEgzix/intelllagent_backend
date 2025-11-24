@@ -26,6 +26,10 @@ export declare class AuthService implements OnModuleInit, OnModuleDestroy {
             email: string;
             name: string | null;
             role: string;
+            timezone: string | null;
+            avatar: string | null;
+            isActive: boolean;
+            isAgent: boolean;
             createdAt: Date;
         };
     }>;
@@ -34,6 +38,10 @@ export declare class AuthService implements OnModuleInit, OnModuleDestroy {
         email: string;
         name: string | null;
         role: string;
+        isAgent: boolean;
+        timezone: string | null;
+        avatar: string | null;
+        isActive: boolean;
         createdAt: Date;
     }>;
     findAllUsers(): Promise<{

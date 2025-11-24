@@ -7,7 +7,8 @@ import {
   OnModuleDestroy,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../generated/prisma/client';
+import { adapter } from '../../prisma.config';
 import * as bcrypt from 'bcrypt';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -17,7 +18,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class AuthService implements OnModuleInit, OnModuleDestroy {
-  private prisma = new PrismaClient();
+  private prisma = new PrismaClient({ adapter });
 
   constructor(private jwtService: JwtService) {}
 
@@ -106,6 +107,10 @@ export class AuthService implements OnModuleInit, OnModuleDestroy {
         email: user.email,
         name: user.name,
         role: user.role,
+        timezone: user.timezone,
+        avatar: user.avatar,
+        isActive: user.isActive,
+        isAgent: user.isAgent,
         createdAt: user.createdAt,
       },
     };
@@ -119,6 +124,10 @@ export class AuthService implements OnModuleInit, OnModuleDestroy {
         email: true,
         name: true,
         role: true,
+        timezone: true,
+        avatar: true,
+        isActive: true,
+        isAgent: true,
         createdAt: true,
       },
     });

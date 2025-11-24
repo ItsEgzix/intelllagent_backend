@@ -1,11 +1,12 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../generated/prisma/client';
+import { adapter } from '../../prisma.config';
 import { CreateEmailDto } from './dto/create-email.dto';
 import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class EmailsService implements OnModuleInit, OnModuleDestroy {
-  private prisma = new PrismaClient();
+  private prisma = new PrismaClient({ adapter });
 
   constructor(private emailService: EmailService) {}
 

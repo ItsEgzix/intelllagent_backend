@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.defineExtension = exports.QueryMode = exports.SortOrder = exports.EmailScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.prismaVersion = exports.getExtensionContext = exports.Decimal = exports.Sql = exports.raw = exports.join = exports.empty = exports.sql = exports.PrismaClientValidationError = exports.PrismaClientInitializationError = exports.PrismaClientRustPanicError = exports.PrismaClientUnknownRequestError = exports.PrismaClientKnownRequestError = void 0;
+exports.defineExtension = exports.NullsOrder = exports.QueryMode = exports.SortOrder = exports.UserScalarFieldEnum = exports.MeetingScalarFieldEnum = exports.CustomerScalarFieldEnum = exports.EmailScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.prismaVersion = exports.getExtensionContext = exports.Decimal = exports.Sql = exports.raw = exports.join = exports.empty = exports.sql = exports.PrismaClientValidationError = exports.PrismaClientInitializationError = exports.PrismaClientRustPanicError = exports.PrismaClientUnknownRequestError = exports.PrismaClientKnownRequestError = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/client"));
 exports.PrismaClientKnownRequestError = runtime.PrismaClientKnownRequestError;
 exports.PrismaClientUnknownRequestError = runtime.PrismaClientUnknownRequestError;
@@ -60,7 +60,10 @@ exports.DbNull = runtime.DbNull;
 exports.JsonNull = runtime.JsonNull;
 exports.AnyNull = runtime.AnyNull;
 exports.ModelName = {
-    Email: 'Email'
+    Email: 'Email',
+    Customer: 'Customer',
+    Meeting: 'Meeting',
+    User: 'User'
 };
 exports.TransactionIsolationLevel = runtime.makeStrictEnum({
     ReadUncommitted: 'ReadUncommitted',
@@ -74,6 +77,45 @@ exports.EmailScalarFieldEnum = {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };
+exports.CustomerScalarFieldEnum = {
+    id: 'id',
+    name: 'name',
+    email: 'email',
+    phone: 'phone',
+    timezone: 'timezone',
+    companyDetails: 'companyDetails',
+    adminId: 'adminId',
+    source: 'source',
+    level: 'level',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.MeetingScalarFieldEnum = {
+    id: 'id',
+    customerDate: 'customerDate',
+    customerTime: 'customerTime',
+    customerTimezone: 'customerTimezone',
+    agentDate: 'agentDate',
+    agentTime: 'agentTime',
+    agentTimezone: 'agentTimezone',
+    customerId: 'customerId',
+    agentId: 'agentId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.UserScalarFieldEnum = {
+    id: 'id',
+    email: 'email',
+    password: 'password',
+    name: 'name',
+    role: 'role',
+    isAgent: 'isAgent',
+    timezone: 'timezone',
+    avatar: 'avatar',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
 exports.SortOrder = {
     asc: 'asc',
     desc: 'desc'
@@ -81,6 +123,10 @@ exports.SortOrder = {
 exports.QueryMode = {
     default: 'default',
     insensitive: 'insensitive'
+};
+exports.NullsOrder = {
+    first: 'first',
+    last: 'last'
 };
 exports.defineExtension = runtime.Extensions.defineExtension;
 //# sourceMappingURL=prismaNamespace.js.map

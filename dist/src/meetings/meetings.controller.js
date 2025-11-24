@@ -16,6 +16,9 @@ exports.MeetingsController = void 0;
 const common_1 = require("@nestjs/common");
 const meetings_service_1 = require("./meetings.service");
 const create_meeting_dto_1 = require("./dto/create-meeting.dto");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const roles_guard_1 = require("../auth/roles.guard");
+const roles_decorator_1 = require("../auth/roles.decorator");
 let MeetingsController = class MeetingsController {
     meetingsService;
     constructor(meetingsService) {
@@ -29,8 +32,10 @@ let MeetingsController = class MeetingsController {
             throw new common_1.BadRequestException(error.message || 'Failed to create meeting');
         }
     }
-    findAll() {
-        return this.meetingsService.findAll();
+    findAll(req) {
+        const userRole = req.user.role;
+        const adminId = userRole === 'superadmin' ? undefined : req.user.sub;
+        return this.meetingsService.findAll(adminId);
     }
 };
 exports.MeetingsController = MeetingsController;
@@ -44,12 +49,15 @@ __decorate([
 ], MeetingsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], MeetingsController.prototype, "findAll", null);
 exports.MeetingsController = MeetingsController = __decorate([
     (0, common_1.Controller)('meetings'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('admin', 'superadmin'),
     __metadata("design:paramtypes", [meetings_service_1.MeetingsService])
 ], MeetingsController);
 //# sourceMappingURL=meetings.controller.js.map

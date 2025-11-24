@@ -4,14 +4,15 @@ import {
   OnModuleDestroy,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../generated/prisma/client';
+import { adapter } from '../../prisma.config';
 import { CreateMeetingDto } from './dto/create-meeting.dto';
 import { EmailService } from '../email/email.service';
 import { convertTimezone } from '../email/templates/timezone-helper';
 
 @Injectable()
 export class MeetingsService implements OnModuleInit, OnModuleDestroy {
-  private prisma = new PrismaClient();
+  private prisma = new PrismaClient({ adapter });
 
   constructor(private emailService: EmailService) {}
 
@@ -29,6 +30,12 @@ export class MeetingsService implements OnModuleInit, OnModuleDestroy {
       where: { email: createMeetingDto.email },
     });
 
+    // Determine adminId - if agent is assigned, use agent's ID as adminId
+    let adminId: string | undefined = undefined;
+    if (createMeetingDto.agentId) {
+      adminId = createMeetingDto.agentId;
+    }
+
     if (!customer) {
       customer = await this.prisma.customer.create({
         data: {
@@ -36,17 +43,26 @@ export class MeetingsService implements OnModuleInit, OnModuleDestroy {
           email: createMeetingDto.email,
           phone: createMeetingDto.phone,
           timezone: createMeetingDto.timezone,
+          adminId: adminId,
+          source: 'website', // Customer self-registered through website
         },
       });
     } else {
       // Update customer info if it has changed
+      // If customer doesn't have an admin and we're assigning an agent, assign adminId
+      const updateData: any = {
+        name: createMeetingDto.customerName,
+        phone: createMeetingDto.phone,
+        timezone: createMeetingDto.timezone,
+      };
+
+      if (adminId && !customer.adminId) {
+        updateData.adminId = adminId;
+      }
+
       customer = await this.prisma.customer.update({
         where: { id: customer.id },
-        data: {
-          name: createMeetingDto.customerName,
-          phone: createMeetingDto.phone,
-          timezone: createMeetingDto.timezone,
-        },
+        data: updateData,
       });
     }
 
@@ -123,10 +139,30 @@ export class MeetingsService implements OnModuleInit, OnModuleDestroy {
     return meeting;
   }
 
-  async findAll() {
+  async findAll(adminId?: string) {
+    const where: any = {};
+
+    // If adminId is provided, filter meetings by customers belonging to that admin
+    if (adminId) {
+      where.customer = {
+        adminId: adminId,
+      };
+    }
+
     const meetings = await this.prisma.meeting.findMany({
+      where,
       include: {
-        customer: true,
+        customer: {
+          include: {
+            admin: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
         agent: true,
       },
       orderBy: {

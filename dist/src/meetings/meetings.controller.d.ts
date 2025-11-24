@@ -7,30 +7,33 @@ export declare class MeetingsController {
         customer: {
             id: string;
             email: string;
-            name: string;
-            timezone: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             phone: string;
+            timezone: string;
+            companyDetails: string | null;
+            adminId: string | null;
+            source: string;
+            level: string;
         };
         agent: {
             id: string;
             email: string;
-            password: string;
-            name: string | null;
-            role: string;
-            isAgent: boolean;
-            timezone: string | null;
-            avatar: string | null;
-            isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
+            name: string | null;
+            timezone: string | null;
+            password: string;
+            role: string;
+            isAgent: boolean;
+            avatar: string | null;
+            isActive: boolean;
         } | null;
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        agentId: string | null;
         customerDate: string;
         customerTime: string;
         customerTimezone: string;
@@ -38,35 +41,45 @@ export declare class MeetingsController {
         agentTime: string | null;
         agentTimezone: string | null;
         customerId: string;
+        agentId: string | null;
     }>;
-    findAll(): Promise<({
+    findAll(req: any): Promise<({
         customer: {
+            admin: {
+                id: string;
+                email: string;
+                name: string | null;
+            } | null;
+        } & {
             id: string;
             email: string;
-            name: string;
-            timezone: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             phone: string;
+            timezone: string;
+            companyDetails: string | null;
+            adminId: string | null;
+            source: string;
+            level: string;
         };
         agent: {
             id: string;
             email: string;
-            password: string;
-            name: string | null;
-            role: string;
-            isAgent: boolean;
-            timezone: string | null;
-            avatar: string | null;
-            isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
+            name: string | null;
+            timezone: string | null;
+            password: string;
+            role: string;
+            isAgent: boolean;
+            avatar: string | null;
+            isActive: boolean;
         } | null;
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        agentId: string | null;
         customerDate: string;
         customerTime: string;
         customerTimezone: string;
@@ -74,5 +87,6 @@ export declare class MeetingsController {
         agentTime: string | null;
         agentTimezone: string | null;
         customerId: string;
+        agentId: string | null;
     })[]>;
 }

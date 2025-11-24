@@ -6,11 +6,18 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { MeetingsService } from './meetings.service';
 import { CreateMeetingDto } from './dto/create-meeting.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('meetings')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin', 'superadmin')
 export class MeetingsController {
   constructor(private readonly meetingsService: MeetingsService) {}
 
@@ -27,7 +34,9 @@ export class MeetingsController {
   }
 
   @Get()
-  findAll() {
-    return this.meetingsService.findAll();
+  findAll(@Request() req: any) {
+    const userRole = req.user.role;
+    const adminId = userRole === 'superadmin' ? undefined : req.user.sub;
+    return this.meetingsService.findAll(adminId);
   }
 }

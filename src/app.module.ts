@@ -6,6 +6,7 @@ import { MeetingsModule } from './meetings/meetings.module';
 import { AuthModule } from './auth/auth.module';
 import { AgentsModule } from './agents/agents.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
+import { CustomersModule } from './customers/customers.module';
 import { UploadsController } from './uploads/uploads.controller';
 
 @Module({
@@ -15,6 +16,7 @@ import { UploadsController } from './uploads/uploads.controller';
     AuthModule,
     AgentsModule,
     ChatbotModule,
+    CustomersModule,
   ],
   controllers: [AppController, UploadsController],
   providers: [AppService],

@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.QueryMode = exports.SortOrder = exports.EmailScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.NullsOrder = exports.QueryMode = exports.SortOrder = exports.UserScalarFieldEnum = exports.MeetingScalarFieldEnum = exports.CustomerScalarFieldEnum = exports.EmailScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -45,7 +45,10 @@ exports.DbNull = runtime.DbNull;
 exports.JsonNull = runtime.JsonNull;
 exports.AnyNull = runtime.AnyNull;
 exports.ModelName = {
-    Email: 'Email'
+    Email: 'Email',
+    Customer: 'Customer',
+    Meeting: 'Meeting',
+    User: 'User'
 };
 exports.TransactionIsolationLevel = {
     ReadUncommitted: 'ReadUncommitted',
@@ -59,6 +62,45 @@ exports.EmailScalarFieldEnum = {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };
+exports.CustomerScalarFieldEnum = {
+    id: 'id',
+    name: 'name',
+    email: 'email',
+    phone: 'phone',
+    timezone: 'timezone',
+    companyDetails: 'companyDetails',
+    adminId: 'adminId',
+    source: 'source',
+    level: 'level',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.MeetingScalarFieldEnum = {
+    id: 'id',
+    customerDate: 'customerDate',
+    customerTime: 'customerTime',
+    customerTimezone: 'customerTimezone',
+    agentDate: 'agentDate',
+    agentTime: 'agentTime',
+    agentTimezone: 'agentTimezone',
+    customerId: 'customerId',
+    agentId: 'agentId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.UserScalarFieldEnum = {
+    id: 'id',
+    email: 'email',
+    password: 'password',
+    name: 'name',
+    role: 'role',
+    isAgent: 'isAgent',
+    timezone: 'timezone',
+    avatar: 'avatar',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
 exports.SortOrder = {
     asc: 'asc',
     desc: 'desc'
@@ -66,5 +108,9 @@ exports.SortOrder = {
 exports.QueryMode = {
     default: 'default',
     insensitive: 'insensitive'
+};
+exports.NullsOrder = {
+    first: 'first',
+    last: 'last'
 };
 //# sourceMappingURL=prismaNamespaceBrowser.js.map

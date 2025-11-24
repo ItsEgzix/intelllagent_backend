@@ -1,5 +1,8 @@
-import * as Prisma from './internal/prismaNamespaceBrowser.js';
+import * as Prisma from './internal/prismaNamespaceBrowser';
 export { Prisma };
-export * as $Enums from './enums.js';
-export * from './enums.js';
+export * as $Enums from './enums';
+export * from './enums';
 export type Email = Prisma.EmailModel;
+export type Customer = Prisma.CustomerModel;
+export type Meeting = Prisma.MeetingModel;
+export type User = Prisma.UserModel;

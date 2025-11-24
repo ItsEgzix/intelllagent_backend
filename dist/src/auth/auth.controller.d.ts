@@ -21,6 +21,10 @@ export declare class AuthController {
             email: string;
             name: string | null;
             role: string;
+            timezone: string | null;
+            avatar: string | null;
+            isActive: boolean;
+            isAgent: boolean;
             createdAt: Date;
         };
     }>;

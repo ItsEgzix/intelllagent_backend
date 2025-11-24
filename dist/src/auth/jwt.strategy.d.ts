@@ -11,6 +11,10 @@ export declare class JwtStrategy extends JwtStrategy_base {
         id: string;
         email: string;
         name: string | null;
+        isAgent: boolean;
+        timezone: string | null;
+        avatar: string | null;
+        isActive: boolean;
         createdAt: Date;
     }>;
 }

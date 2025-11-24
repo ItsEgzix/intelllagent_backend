@@ -5,7 +5,8 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../generated/prisma/client';
+import { adapter } from '../../prisma.config';
 import * as bcrypt from 'bcrypt';
 import { CreateAgentDto } from './dto/create-agent.dto';
 import { UpdateAgentDto } from './dto/update-agent.dto';
@@ -13,7 +14,7 @@ import { convertTimezone } from '../email/templates/timezone-helper';
 
 @Injectable()
 export class AgentsService implements OnModuleInit, OnModuleDestroy {
-  private prisma = new PrismaClient();
+  private prisma = new PrismaClient({ adapter });
 
   async onModuleInit() {
     try {
@@ -212,7 +213,15 @@ export class AgentsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async update(id: string, updateAgentDto: UpdateAgentDto) {
-    await this.findOne(id); // Check if agent exists
+    // Check if user exists (without filtering by isAgent, since we might be updating isAgent itself)
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id },
+      select: { id: true, isAgent: true },
+    });
+
+    if (!existingUser) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
 
     // Don't allow changing role or password through this endpoint
     const { ...updateData } = updateAgentDto;
@@ -236,7 +245,15 @@ export class AgentsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async remove(id: string) {
-    await this.findOne(id); // Check if agent exists
+    // Check if user exists (without filtering by isAgent, since we might be removing a former agent)
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id },
+      select: { id: true, isAgent: true },
+    });
+
+    if (!existingUser) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
 
     // Check if agent has any meetings
     const meetingsCount = await this.prisma.meeting.count({

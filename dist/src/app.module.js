@@ -15,6 +15,7 @@ const meetings_module_1 = require("./meetings/meetings.module");
 const auth_module_1 = require("./auth/auth.module");
 const agents_module_1 = require("./agents/agents.module");
 const chatbot_module_1 = require("./chatbot/chatbot.module");
+const customers_module_1 = require("./customers/customers.module");
 const uploads_controller_1 = require("./uploads/uploads.controller");
 let AppModule = class AppModule {
 };
@@ -27,6 +28,7 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             agents_module_1.AgentsModule,
             chatbot_module_1.ChatbotModule,
+            customers_module_1.CustomersModule,
         ],
         controllers: [app_controller_1.AppController, uploads_controller_1.UploadsController],
         providers: [app_service_1.AppService],

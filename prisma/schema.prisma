@@ -5,12 +5,14 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client" // or `prisma-client-js`
+  output          = "../generated/prisma"
+  engineType      = "client" // enable Prisma ORM without Rust
+  previewFeatures = []
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Email {
@@ -21,14 +23,19 @@ model Email {
 }
 
 model Customer {
-  id        String    @id @default(uuid())
-  name      String
-  email     String    @unique
-  phone     String
-  timezone  String    // Customer's timezone
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  meetings  Meeting[] // Meetings for this customer
+  id             String    @id @default(uuid())
+  name           String
+  email          String    @unique
+  phone          String
+  timezone      String    // Customer's timezone
+  companyDetails String?   @db.Text // Markdown content about the company
+  adminId        String?   // Admin who created/manages this customer
+  admin          User?     @relation("CustomerAdmin", fields: [adminId], references: [id], onDelete: SetNull)
+  source         String    @default("website") // "website" (self-registered) or "admin" (added by admin)
+  level          String    @default("new") // "new", "contacted", "responded", "qualified", "customer"
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  meetings       Meeting[] // Meetings for this customer
 }
 
 model Meeting {
@@ -51,16 +58,17 @@ model Meeting {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  password  String
-  name      String?
-  role      String    @default("admin") // "admin" or "superadmin"
-  isAgent   Boolean   @default(false) // Whether this user is an agent
-  timezone  String?   @default("Asia/Kuala_Lumpur") // Timezone for agents
-  avatar    String?   // URL or path to avatar image
-  isActive  Boolean   @default(true) // For agents to enable/disable
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  meetings  Meeting[] // Meetings assigned to this agent
+  id           String     @id @default(uuid())
+  email        String     @unique
+  password     String
+  name         String?
+  role         String     @default("admin") // "admin" or "superadmin"
+  isAgent      Boolean    @default(false) // Whether this user is an agent
+  timezone     String?    @default("Asia/Kuala_Lumpur") // Timezone for agents
+  avatar       String?    // URL or path to avatar image
+  isActive     Boolean    @default(true) // For agents to enable/disable
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  meetings     Meeting[]  // Meetings assigned to this agent
+  customers    Customer[] @relation("CustomerAdmin") // Customers managed by this admin
 }
