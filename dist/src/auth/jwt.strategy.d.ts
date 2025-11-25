@@ -8,8 +8,8 @@ export declare class JwtStrategy extends JwtStrategy_base {
     constructor(authService: AuthService);
     validate(payload: any): Promise<{
         role: any;
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         name: string | null;
         timezone: string | null;

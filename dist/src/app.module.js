@@ -16,8 +16,8 @@ const auth_module_1 = require("./auth/auth.module");
 const agents_module_1 = require("./agents/agents.module");
 const chatbot_module_1 = require("./chatbot/chatbot.module");
 const customers_module_1 = require("./customers/customers.module");
-const uploads_controller_1 = require("./uploads/uploads.controller");
 const translations_module_1 = require("./translations/translations.module");
+const cloudinary_module_1 = require("./cloudinary/cloudinary.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -31,8 +31,9 @@ exports.AppModule = AppModule = __decorate([
             chatbot_module_1.ChatbotModule,
             customers_module_1.CustomersModule,
             translations_module_1.TranslationsModule,
+            cloudinary_module_1.CloudinaryModule,
         ],
-        controllers: [app_controller_1.AppController, uploads_controller_1.UploadsController],
+        controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })
 ], AppModule);

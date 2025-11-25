@@ -7,8 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { AgentsModule } from './agents/agents.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { CustomersModule } from './customers/customers.module';
-import { UploadsController } from './uploads/uploads.controller';
 import { TranslationsModule } from './translations/translations.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -19,8 +19,9 @@ import { TranslationsModule } from './translations/translations.module';
     ChatbotModule,
     CustomersModule,
     TranslationsModule,
+    CloudinaryModule,
   ],
-  controllers: [AppController, UploadsController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}

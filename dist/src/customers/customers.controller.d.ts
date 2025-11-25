@@ -6,8 +6,8 @@ export declare class CustomersController {
     constructor(customersService: CustomersService);
     create(createCustomerDto: CreateCustomerDto, req: any): Promise<{
         admin: {
-            id: string;
             email: string;
+            id: string;
             name: string | null;
         } | null;
         meetings: {
@@ -24,8 +24,8 @@ export declare class CustomersController {
             agentId: string | null;
         }[];
     } & {
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
@@ -38,8 +38,8 @@ export declare class CustomersController {
     }>;
     findAll(req: any): Promise<({
         admin: {
-            id: string;
             email: string;
+            id: string;
             name: string | null;
         } | null;
         meetings: {
@@ -56,8 +56,8 @@ export declare class CustomersController {
             agentId: string | null;
         }[];
     } & {
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
@@ -70,8 +70,8 @@ export declare class CustomersController {
     })[]>;
     findOne(id: string, req: any): Promise<{
         admin: {
-            id: string;
             email: string;
+            id: string;
             name: string | null;
         } | null;
         meetings: {
@@ -88,8 +88,8 @@ export declare class CustomersController {
             agentId: string | null;
         }[];
     } & {
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
@@ -102,8 +102,8 @@ export declare class CustomersController {
     }>;
     update(id: string, updateCustomerDto: UpdateCustomerDto, req: any): Promise<{
         admin: {
-            id: string;
             email: string;
+            id: string;
             name: string | null;
         } | null;
         meetings: {
@@ -120,8 +120,8 @@ export declare class CustomersController {
             agentId: string | null;
         }[];
     } & {
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
@@ -133,8 +133,8 @@ export declare class CustomersController {
         level: string;
     }>;
     remove(id: string, req: any): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;

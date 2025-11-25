@@ -12,10 +12,22 @@ export class PrismaService
   }
 
   async onModuleInit() {
-    await this.$connect();
+    try {
+      await this.$connect();
+      console.log('✅ Prisma client connected to database');
+    } catch (error) {
+      console.error('❌ Failed to connect to database:', error);
+      console.error('Please check your DATABASE_URL environment variable');
+      throw error;
+    }
   }
 
   async onModuleDestroy() {
-    await this.$disconnect();
+    try {
+      await this.$disconnect();
+      console.log('✅ Prisma client disconnected from database');
+    } catch (error) {
+      console.error('❌ Error disconnecting from database:', error);
+    }
   }
 }

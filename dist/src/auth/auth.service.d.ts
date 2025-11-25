@@ -1,19 +1,19 @@
-import { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-export declare class AuthService implements OnModuleInit, OnModuleDestroy {
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+export declare class AuthService {
+    private readonly prisma;
     private jwtService;
-    private prisma;
-    constructor(jwtService: JwtService);
-    onModuleInit(): Promise<void>;
-    onModuleDestroy(): Promise<void>;
+    private cloudinaryService;
+    constructor(prisma: PrismaService, jwtService: JwtService, cloudinaryService: CloudinaryService);
     register(registerDto: RegisterDto, requestingUserRole?: string): Promise<{
         access_token: string;
         user: {
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             name: string | null;
             role: string;
@@ -34,8 +34,8 @@ export declare class AuthService implements OnModuleInit, OnModuleDestroy {
         };
     }>;
     validateUser(userId: string): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         name: string | null;
         timezone: string | null;
@@ -45,8 +45,8 @@ export declare class AuthService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }>;
     findAllUsers(): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;
@@ -57,8 +57,8 @@ export declare class AuthService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }[]>;
     updateUser(id: string, updateUserDto: UpdateUserDto): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;

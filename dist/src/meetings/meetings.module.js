@@ -11,12 +11,13 @@ const common_1 = require("@nestjs/common");
 const meetings_service_1 = require("./meetings.service");
 const meetings_controller_1 = require("./meetings.controller");
 const email_module_1 = require("../email/email.module");
+const prisma_module_1 = require("../prisma/prisma.module");
 let MeetingsModule = class MeetingsModule {
 };
 exports.MeetingsModule = MeetingsModule;
 exports.MeetingsModule = MeetingsModule = __decorate([
     (0, common_1.Module)({
-        imports: [email_module_1.EmailModule],
+        imports: [prisma_module_1.PrismaModule, email_module_1.EmailModule],
         controllers: [meetings_controller_1.MeetingsController],
         providers: [meetings_service_1.MeetingsService],
         exports: [meetings_service_1.MeetingsService],

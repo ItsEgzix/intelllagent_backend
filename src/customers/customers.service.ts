@@ -2,35 +2,14 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
-  OnModuleInit,
-  OnModuleDestroy,
 } from '@nestjs/common';
-import { PrismaClient } from '../../generated/prisma/client';
-import { adapter } from '../../prisma.config';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 @Injectable()
-export class CustomersService implements OnModuleInit, OnModuleDestroy {
-  private prisma = new PrismaClient({ adapter });
-
-  async onModuleInit() {
-    try {
-      await this.prisma.$connect();
-      console.log('CustomersService: Prisma client connected');
-    } catch (error) {
-      console.error('CustomersService: Failed to connect to database:', error);
-    }
-  }
-
-  async onModuleDestroy() {
-    try {
-      await this.prisma.$disconnect();
-      console.log('CustomersService: Prisma client disconnected');
-    } catch (error) {
-      console.error('CustomersService: Error disconnecting:', error);
-    }
-  }
+export class CustomersService {
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createCustomerDto: CreateCustomerDto, adminId: string) {
     // Check if customer with email already exists

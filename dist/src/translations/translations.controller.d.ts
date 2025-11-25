@@ -4,29 +4,29 @@ export declare class TranslationsController {
     private readonly translationsService;
     constructor(translationsService: TranslationsService);
     listTranslations(): Promise<{
-        nativeName: string | null;
-        englishName: string | null;
         id: string;
-        code: string;
         createdAt: Date;
         updatedAt: Date;
+        code: string;
+        nativeName: string | null;
+        englishName: string | null;
     }[]>;
     getTranslation(code: string): Promise<{
         data: import("@prisma/client/runtime/client").JsonValue;
-        nativeName: string | null;
-        englishName: string | null;
         id: string;
-        code: string;
         createdAt: Date;
         updatedAt: Date;
+        code: string;
+        nativeName: string | null;
+        englishName: string | null;
     }>;
     upsertTranslation(code: string, updateTranslationDto: UpdateTranslationDto): Promise<{
         data: import("@prisma/client/runtime/client").JsonValue;
-        nativeName: string | null;
-        englishName: string | null;
         id: string;
-        code: string;
         createdAt: Date;
         updatedAt: Date;
+        code: string;
+        nativeName: string | null;
+        englishName: string | null;
     }>;
 }

@@ -2,37 +2,16 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
-  OnModuleInit,
-  OnModuleDestroy,
 } from '@nestjs/common';
-import { PrismaClient } from '../../generated/prisma/client';
-import { adapter } from '../../prisma.config';
+import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { CreateAgentDto } from './dto/create-agent.dto';
 import { UpdateAgentDto } from './dto/update-agent.dto';
 import { convertTimezone } from '../email/templates/timezone-helper';
 
 @Injectable()
-export class AgentsService implements OnModuleInit, OnModuleDestroy {
-  private prisma = new PrismaClient({ adapter });
-
-  async onModuleInit() {
-    try {
-      await this.prisma.$connect();
-      console.log('AgentsService: Prisma client connected');
-    } catch (error) {
-      console.error('AgentsService: Failed to connect to database:', error);
-    }
-  }
-
-  async onModuleDestroy() {
-    try {
-      await this.prisma.$disconnect();
-      console.log('AgentsService: Prisma client disconnected');
-    } catch (error) {
-      console.error('AgentsService: Error disconnecting:', error);
-    }
-  }
+export class AgentsService {
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createAgentDto: CreateAgentDto) {
     // If userId is provided, update existing user to be an agent
@@ -148,9 +127,6 @@ export class AgentsService implements OnModuleInit, OnModuleDestroy {
   async findActive() {
     // Return only active users with isAgent = true
     try {
-      // Ensure connection is alive
-      await this.prisma.$connect();
-
       return await this.prisma.user.findMany({
         where: {
           isAgent: true,

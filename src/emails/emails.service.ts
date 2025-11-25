@@ -1,22 +1,14 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '../../generated/prisma/client';
-import { adapter } from '../../prisma.config';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateEmailDto } from './dto/create-email.dto';
 import { EmailService } from '../email/email.service';
 
 @Injectable()
-export class EmailsService implements OnModuleInit, OnModuleDestroy {
-  private prisma = new PrismaClient({ adapter });
-
-  constructor(private emailService: EmailService) {}
-
-  async onModuleInit() {
-    await this.prisma.$connect();
-  }
-
-  async onModuleDestroy() {
-    await this.prisma.$disconnect();
-  }
+export class EmailsService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private emailService: EmailService,
+  ) {}
 
   async create(createEmailDto: CreateEmailDto) {
     const email = await this.prisma.email.create({

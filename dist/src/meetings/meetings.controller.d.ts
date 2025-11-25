@@ -5,8 +5,8 @@ export declare class MeetingsController {
     constructor(meetingsService: MeetingsService);
     create(createMeetingDto: CreateMeetingDto): Promise<{
         customer: {
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
             name: string;
@@ -18,8 +18,8 @@ export declare class MeetingsController {
             level: string;
         };
         agent: {
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
             name: string | null;
@@ -46,13 +46,13 @@ export declare class MeetingsController {
     findAll(req: any): Promise<({
         customer: {
             admin: {
-                id: string;
                 email: string;
+                id: string;
                 name: string | null;
             } | null;
         } & {
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
             name: string;
@@ -64,8 +64,8 @@ export declare class MeetingsController {
             level: string;
         };
         agent: {
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
             name: string | null;

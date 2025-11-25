@@ -5,8 +5,8 @@ export declare class AgentsController {
     private readonly agentsService;
     constructor(agentsService: AgentsService);
     findActive(): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;
@@ -17,8 +17,8 @@ export declare class AgentsController {
         isActive: boolean;
     }[]>;
     create(createAgentDto: CreateAgentDto): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;
@@ -29,8 +29,8 @@ export declare class AgentsController {
         isActive: boolean;
     }>;
     findAll(): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;
@@ -41,8 +41,8 @@ export declare class AgentsController {
         isActive: boolean;
     }[]>;
     findOne(id: string): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;
@@ -53,8 +53,8 @@ export declare class AgentsController {
         isActive: boolean;
     }>;
     update(id: string, updateAgentDto: UpdateAgentDto): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;
@@ -65,8 +65,8 @@ export declare class AgentsController {
         isActive: boolean;
     }>;
     remove(id: string): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;

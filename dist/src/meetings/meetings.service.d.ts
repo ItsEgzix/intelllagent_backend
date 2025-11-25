@@ -1,16 +1,14 @@
-import { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateMeetingDto } from './dto/create-meeting.dto';
 import { EmailService } from '../email/email.service';
-export declare class MeetingsService implements OnModuleInit, OnModuleDestroy {
+export declare class MeetingsService {
+    private readonly prisma;
     private emailService;
-    private prisma;
-    constructor(emailService: EmailService);
-    onModuleInit(): Promise<void>;
-    onModuleDestroy(): Promise<void>;
+    constructor(prisma: PrismaService, emailService: EmailService);
     create(createMeetingDto: CreateMeetingDto): Promise<{
         customer: {
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
             name: string;
@@ -22,8 +20,8 @@ export declare class MeetingsService implements OnModuleInit, OnModuleDestroy {
             level: string;
         };
         agent: {
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
             name: string | null;
@@ -50,13 +48,13 @@ export declare class MeetingsService implements OnModuleInit, OnModuleDestroy {
     findAll(adminId?: string): Promise<({
         customer: {
             admin: {
-                id: string;
                 email: string;
+                id: string;
                 name: string | null;
             } | null;
         } & {
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
             name: string;
@@ -68,8 +66,8 @@ export declare class MeetingsService implements OnModuleInit, OnModuleDestroy {
             level: string;
         };
         agent: {
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
             name: string | null;

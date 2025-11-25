@@ -6,20 +6,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EmailsModule = void 0;
+exports.CloudinaryModule = void 0;
 const common_1 = require("@nestjs/common");
-const emails_service_1 = require("./emails.service");
-const emails_controller_1 = require("./emails.controller");
-const email_module_1 = require("../email/email.module");
-const prisma_module_1 = require("../prisma/prisma.module");
-let EmailsModule = class EmailsModule {
+const cloudinary_config_1 = require("./cloudinary.config");
+const cloudinary_service_1 = require("./cloudinary.service");
+let CloudinaryModule = class CloudinaryModule {
 };
-exports.EmailsModule = EmailsModule;
-exports.EmailsModule = EmailsModule = __decorate([
+exports.CloudinaryModule = CloudinaryModule;
+exports.CloudinaryModule = CloudinaryModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, email_module_1.EmailModule],
-        controllers: [emails_controller_1.EmailsController],
-        providers: [emails_service_1.EmailsService],
+        providers: [cloudinary_config_1.CloudinaryProvider, cloudinary_service_1.CloudinaryService],
+        exports: [cloudinary_service_1.CloudinaryService],
     })
-], EmailsModule);
-//# sourceMappingURL=emails.module.js.map
+], CloudinaryModule);
+//# sourceMappingURL=cloudinary.module.js.map

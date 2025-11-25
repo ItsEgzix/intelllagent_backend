@@ -3,21 +3,12 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
 
 let app: NestExpressApplication;
 
 async function bootstrap() {
   try {
     console.log('🔄 Starting bootstrap...');
-
-    // Ensure uploads directory exists
-    const uploadsDir = join(process.cwd(), 'uploads', 'avatars');
-    if (!existsSync(uploadsDir)) {
-      mkdirSync(uploadsDir, { recursive: true });
-    }
-    console.log('✅ Uploads directory ready');
 
     console.log('🔄 Creating NestJS application...');
     app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -30,19 +21,6 @@ async function bootstrap() {
       exposedHeaders: ['Content-Type', 'Content-Length'],
     });
     console.log('✅ CORS enabled');
-
-    // Serve static files from uploads directory
-    app.useStaticAssets(join(process.cwd(), 'uploads'), {
-      prefix: '/uploads/',
-      setHeaders: (res) => {
-        res.set(
-          'Access-Control-Allow-Origin',
-          process.env.FRONTEND_URL || 'http://localhost:3000',
-        );
-        res.set('Access-Control-Allow-Credentials', 'true');
-      },
-    });
-    console.log('✅ Static assets configured');
 
     // Enable validation (skip for multipart/form-data routes)
     app.useGlobalPipes(
@@ -73,25 +51,11 @@ async function bootstrap() {
 export const handler = async (req: any, res: any) => {
   if (!app) {
     // For serverless, we need to init but not listen
-    const uploadsDir = join(process.cwd(), 'uploads', 'avatars');
-    if (!existsSync(uploadsDir)) {
-      mkdirSync(uploadsDir, { recursive: true });
-    }
     app = await NestFactory.create<NestExpressApplication>(AppModule);
     app.enableCors({
       origin: process.env.FRONTEND_URL || 'http://localhost:3000',
       credentials: true,
       exposedHeaders: ['Content-Type', 'Content-Length'],
-    });
-    app.useStaticAssets(join(process.cwd(), 'uploads'), {
-      prefix: '/uploads/',
-      setHeaders: (res) => {
-        res.set(
-          'Access-Control-Allow-Origin',
-          process.env.FRONTEND_URL || 'http://localhost:3000',
-        );
-        res.set('Access-Control-Allow-Credentials', 'true');
-      },
     });
     app.useGlobalPipes(
       new ValidationPipe({

@@ -14,6 +14,8 @@ const auth_service_1 = require("./auth.service");
 const auth_controller_1 = require("./auth.controller");
 const jwt_strategy_1 = require("./jwt.strategy");
 const roles_guard_1 = require("./roles.guard");
+const cloudinary_module_1 = require("../cloudinary/cloudinary.module");
+const prisma_module_1 = require("../prisma/prisma.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -21,6 +23,8 @@ exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [
             passport_1.PassportModule,
+            prisma_module_1.PrismaModule,
+            cloudinary_module_1.CloudinaryModule,
             jwt_1.JwtModule.register({
                 secret: process.env.JWT_SECRET || 'intellagent',
                 signOptions: { expiresIn: '7d' },

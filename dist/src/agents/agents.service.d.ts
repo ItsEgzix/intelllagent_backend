@@ -1,13 +1,12 @@
-import { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateAgentDto } from './dto/create-agent.dto';
 import { UpdateAgentDto } from './dto/update-agent.dto';
-export declare class AgentsService implements OnModuleInit, OnModuleDestroy {
-    private prisma;
-    onModuleInit(): Promise<void>;
-    onModuleDestroy(): Promise<void>;
+export declare class AgentsService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
     create(createAgentDto: CreateAgentDto): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;
@@ -18,8 +17,8 @@ export declare class AgentsService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }>;
     findAll(): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;
@@ -30,8 +29,8 @@ export declare class AgentsService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }[]>;
     findActive(): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;
@@ -42,8 +41,8 @@ export declare class AgentsService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }[]>;
     findOne(id: string): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;
@@ -54,8 +53,8 @@ export declare class AgentsService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }>;
     update(id: string, updateAgentDto: UpdateAgentDto): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;
@@ -66,8 +65,8 @@ export declare class AgentsService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }>;
     remove(id: string): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;

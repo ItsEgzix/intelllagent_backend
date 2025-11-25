@@ -15,9 +15,8 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { AuthService } from './auth.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -27,7 +26,10 @@ import { Roles } from './roles.decorator';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Post('register')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -71,15 +73,6 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('avatar', {
-      storage: diskStorage({
-        destination: './uploads/avatars',
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `avatar-${uniqueSuffix}${ext}`);
-        },
-      }),
       fileFilter: (req, file, cb) => {
         if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
           return cb(
@@ -117,8 +110,17 @@ export class AuthController {
     };
 
     if (file) {
-      // Save file path relative to uploads folder
-      updateUserDto.avatar = `/uploads/avatars/${file.filename}`;
+      try {
+        // Upload to Cloudinary
+        const imageUrl = await this.cloudinaryService.uploadImage(
+          file,
+          'avatars',
+        );
+        updateUserDto.avatar = imageUrl;
+      } catch (error) {
+        console.error('Error uploading avatar to Cloudinary:', error);
+        throw new BadRequestException('Failed to upload avatar image');
+      }
     }
 
     return this.authService.updateUser(id, updateUserDto);

@@ -1,14 +1,13 @@
-import { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
-export declare class CustomersService implements OnModuleInit, OnModuleDestroy {
-    private prisma;
-    onModuleInit(): Promise<void>;
-    onModuleDestroy(): Promise<void>;
+export declare class CustomersService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
     create(createCustomerDto: CreateCustomerDto, adminId: string): Promise<{
         admin: {
-            id: string;
             email: string;
+            id: string;
             name: string | null;
         } | null;
         meetings: {
@@ -25,8 +24,8 @@ export declare class CustomersService implements OnModuleInit, OnModuleDestroy {
             agentId: string | null;
         }[];
     } & {
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
@@ -39,8 +38,8 @@ export declare class CustomersService implements OnModuleInit, OnModuleDestroy {
     }>;
     findAll(adminId?: string): Promise<({
         admin: {
-            id: string;
             email: string;
+            id: string;
             name: string | null;
         } | null;
         meetings: {
@@ -57,8 +56,8 @@ export declare class CustomersService implements OnModuleInit, OnModuleDestroy {
             agentId: string | null;
         }[];
     } & {
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
@@ -71,8 +70,8 @@ export declare class CustomersService implements OnModuleInit, OnModuleDestroy {
     })[]>;
     findOne(id: string, adminId?: string): Promise<{
         admin: {
-            id: string;
             email: string;
+            id: string;
             name: string | null;
         } | null;
         meetings: {
@@ -89,8 +88,8 @@ export declare class CustomersService implements OnModuleInit, OnModuleDestroy {
             agentId: string | null;
         }[];
     } & {
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
@@ -103,8 +102,8 @@ export declare class CustomersService implements OnModuleInit, OnModuleDestroy {
     }>;
     update(id: string, updateCustomerDto: UpdateCustomerDto, adminId?: string): Promise<{
         admin: {
-            id: string;
             email: string;
+            id: string;
             name: string | null;
         } | null;
         meetings: {
@@ -121,8 +120,8 @@ export declare class CustomersService implements OnModuleInit, OnModuleDestroy {
             agentId: string | null;
         }[];
     } & {
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
@@ -134,8 +133,8 @@ export declare class CustomersService implements OnModuleInit, OnModuleDestroy {
         level: string;
     }>;
     remove(id: string, adminId?: string): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;

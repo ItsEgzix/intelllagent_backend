@@ -1,21 +1,19 @@
-import { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateEmailDto } from './dto/create-email.dto';
 import { EmailService } from '../email/email.service';
-export declare class EmailsService implements OnModuleInit, OnModuleDestroy {
+export declare class EmailsService {
+    private readonly prisma;
     private emailService;
-    private prisma;
-    constructor(emailService: EmailService);
-    onModuleInit(): Promise<void>;
-    onModuleDestroy(): Promise<void>;
+    constructor(prisma: PrismaService, emailService: EmailService);
     create(createEmailDto: CreateEmailDto): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
     findAll(): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
     }[]>;

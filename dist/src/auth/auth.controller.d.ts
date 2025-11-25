@@ -1,14 +1,16 @@
 import { AuthService } from './auth.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 export declare class AuthController {
     private readonly authService;
-    constructor(authService: AuthService);
+    private readonly cloudinaryService;
+    constructor(authService: AuthService, cloudinaryService: CloudinaryService);
     register(registerDto: RegisterDto, req: any): Promise<{
         access_token: string;
         user: {
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             name: string | null;
             role: string;
@@ -33,8 +35,8 @@ export declare class AuthController {
     }>;
     getProfile(req: any): Promise<any>;
     getAllUsers(): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;
@@ -45,8 +47,8 @@ export declare class AuthController {
         isActive: boolean;
     }[]>;
     updateUser(id: string, body: any, req: any, file?: any): Promise<{
-        id: string;
         email: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string | null;

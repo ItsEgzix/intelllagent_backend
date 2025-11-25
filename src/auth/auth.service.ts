@@ -3,32 +3,22 @@ import {
   UnauthorizedException,
   ConflictException,
   NotFoundException,
-  OnModuleInit,
-  OnModuleDestroy,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaClient } from '../../generated/prisma/client';
-import { adapter } from '../../prisma.config';
+import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import * as fs from 'fs';
-import * as path from 'path';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
-export class AuthService implements OnModuleInit, OnModuleDestroy {
-  private prisma = new PrismaClient({ adapter });
-
-  constructor(private jwtService: JwtService) {}
-
-  async onModuleInit() {
-    await this.prisma.$connect();
-  }
-
-  async onModuleDestroy() {
-    await this.prisma.$disconnect();
-  }
+export class AuthService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private jwtService: JwtService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
   async register(registerDto: RegisterDto, requestingUserRole?: string) {
     const { email, password, name } = registerDto;
@@ -179,14 +169,13 @@ export class AuthService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    // If avatar is being updated and old avatar exists, delete old file
+    // If avatar is being updated and old avatar exists, delete old file from Cloudinary
     if (updateUserDto.avatar && user.avatar) {
-      const oldAvatarPath = path.join(process.cwd(), user.avatar);
-      if (fs.existsSync(oldAvatarPath)) {
-        try {
-          fs.unlinkSync(oldAvatarPath);
-        } catch (error) {
-          console.error('Error deleting old avatar:', error);
+      // Check if old avatar is a Cloudinary URL
+      if (user.avatar.startsWith('http')) {
+        const publicId = this.cloudinaryService.extractPublicId(user.avatar);
+        if (publicId) {
+          await this.cloudinaryService.deleteImage(publicId);
         }
       }
     }
