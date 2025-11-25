@@ -16,11 +16,10 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 
 @Controller('meetings')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin', 'superadmin')
 export class MeetingsController {
   constructor(private readonly meetingsService: MeetingsService) {}
 
+  // Public endpoint - anyone can create a meeting
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createMeetingDto: CreateMeetingDto) {
@@ -33,7 +32,10 @@ export class MeetingsController {
     }
   }
 
+  // Protected endpoint - only admins can view meetings
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superadmin')
   findAll(@Request() req: any) {
     const userRole = req.user.role;
     const adminId = userRole === 'superadmin' ? undefined : req.user.sub;

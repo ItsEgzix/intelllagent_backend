@@ -16,6 +16,7 @@ export declare class ChatbotService implements OnModuleInit {
     private getFunctionDisplayName;
     private processResponseRecursively;
     private generateSessionId;
+    private retryWithBackoff;
     sendMessage(message: string, sessionId?: string): Promise<{
         response: string;
         sessionId: string;

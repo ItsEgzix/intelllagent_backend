@@ -379,10 +379,45 @@ ${JSON.stringify(sourceData, null, 2)}
 Return the translated JSON:`;
 
     try {
-      const response = await genAI.models.generateContent({
-        model: 'gemini-2.0-flash',
-        contents: [{ role: 'user', parts: [{ text: translationPrompt }] }],
-      });
+      // Helper function for retry with exponential backoff
+      const retryWithBackoff = async <T>(
+        fn: () => Promise<T>,
+        maxRetries: number = 3,
+        initialDelay: number = 1000,
+      ): Promise<T> => {
+        let lastError: Error | unknown;
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+          try {
+            return await fn();
+          } catch (error) {
+            lastError = error;
+            const isNetworkError =
+              error instanceof Error &&
+              (error.message.includes('fetch failed') ||
+                error.message.includes('ECONNREFUSED') ||
+                error.message.includes('ETIMEDOUT') ||
+                error.message.includes('ENOTFOUND'));
+
+            if (isNetworkError && attempt < maxRetries - 1) {
+              const delay = initialDelay * Math.pow(2, attempt);
+              console.warn(
+                `Translation: Network error on attempt ${attempt + 1}/${maxRetries}, retrying in ${delay}ms...`,
+              );
+              await new Promise((resolve) => setTimeout(resolve, delay));
+              continue;
+            }
+            throw error;
+          }
+        }
+        throw lastError;
+      };
+
+      const response = (await retryWithBackoff(() =>
+        genAI.models.generateContent({
+          model: 'gemini-2.0-flash',
+          contents: [{ role: 'user', parts: [{ text: translationPrompt }] }],
+        }),
+      )) as any;
 
       let translatedText = '';
       if (

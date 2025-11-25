@@ -147,16 +147,19 @@ export class ChatbotService implements OnModuleInit {
       return null; // Prevent infinite loops
     }
 
-    const response = await this.genAI.models.generateContent({
-      model: 'gemini-2.0-flash',
-      config: {
-        systemInstruction: {
-          parts: [{ text: systemPrompt }],
+    // Use retry logic for network errors
+    const response = await this.retryWithBackoff(() =>
+      this.genAI.models.generateContent({
+        model: 'gemini-2.0-flash',
+        config: {
+          systemInstruction: {
+            parts: [{ text: systemPrompt }],
+          },
+          tools,
         },
-        tools,
-      },
-      contents: session.history,
-    });
+        contents: session.history,
+      }),
+    );
 
     // Extract text from response
     let responseText: string | null = null;
@@ -285,6 +288,42 @@ export class ChatbotService implements OnModuleInit {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
+  /**
+   * Retry helper for API calls with exponential backoff
+   */
+  private async retryWithBackoff<T>(
+    fn: () => Promise<T>,
+    maxRetries: number = 3,
+    initialDelay: number = 1000,
+  ): Promise<T> {
+    let lastError: Error | unknown;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        lastError = error;
+        const isNetworkError =
+          error instanceof Error &&
+          (error.message.includes('fetch failed') ||
+            error.message.includes('ECONNREFUSED') ||
+            error.message.includes('ETIMEDOUT') ||
+            error.message.includes('ENOTFOUND'));
+
+        // Only retry on network errors, not on API errors
+        if (isNetworkError && attempt < maxRetries - 1) {
+          const delay = initialDelay * Math.pow(2, attempt);
+          console.warn(
+            `Network error on attempt ${attempt + 1}/${maxRetries}, retrying in ${delay}ms...`,
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+        throw error;
+      }
+    }
+    throw lastError;
+  }
+
   async sendMessage(
     message: string,
     sessionId?: string,
@@ -318,16 +357,19 @@ export class ChatbotService implements OnModuleInit {
         },
       ] as any[];
 
-      const response = await this.genAI.models.generateContent({
-        model: 'gemini-2.0-flash',
-        config: {
-          systemInstruction: {
-            parts: [{ text: systemPrompt }],
+      // Use retry logic for network errors
+      const response = await this.retryWithBackoff(() =>
+        this.genAI.models.generateContent({
+          model: 'gemini-2.0-flash',
+          config: {
+            systemInstruction: {
+              parts: [{ text: systemPrompt }],
+            },
+            tools,
           },
-          tools,
-        },
-        contents,
-      });
+          contents,
+        }),
+      );
 
       // Check if response has function calls
       // The response might have functionCalls property or functionCalls in parts
@@ -484,10 +526,65 @@ export class ChatbotService implements OnModuleInit {
 
       throw new Error('No response text generated');
     } catch (error) {
-      console.error('Error calling Gemini API:', error);
-      throw new Error(
-        `Failed to get response: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      // Enhanced error handling with better categorization
+      let errorMessage = 'Failed to get response from AI';
+      let userFriendlyMessage =
+        'Sorry, I encountered an error. Please try again.';
+
+      if (error instanceof Error) {
+        const errorMsg = error.message.toLowerCase();
+
+        // Network errors
+        if (
+          errorMsg.includes('fetch failed') ||
+          errorMsg.includes('econnrefused') ||
+          errorMsg.includes('etimedout') ||
+          errorMsg.includes('enotfound') ||
+          errorMsg.includes('network')
+        ) {
+          errorMessage = 'Network error: Unable to connect to AI service';
+          userFriendlyMessage =
+            "I'm having trouble connecting to the AI service. Please check your internet connection and try again.";
+        }
+        // Authentication errors
+        else if (
+          errorMsg.includes('api key') ||
+          errorMsg.includes('unauthorized') ||
+          errorMsg.includes('401') ||
+          errorMsg.includes('403')
+        ) {
+          errorMessage = 'Authentication error: Invalid API key';
+          userFriendlyMessage =
+            'AI service authentication failed. Please contact support.';
+        }
+        // Rate limiting
+        else if (
+          errorMsg.includes('rate limit') ||
+          errorMsg.includes('429') ||
+          errorMsg.includes('quota')
+        ) {
+          errorMessage = 'Rate limit exceeded';
+          userFriendlyMessage =
+            'Too many requests. Please wait a moment and try again.';
+        }
+        // Other errors
+        else {
+          errorMessage = `AI service error: ${error.message}`;
+          userFriendlyMessage =
+            'I encountered an unexpected error. Please try again in a moment.';
+        }
+
+        console.error('Error calling Gemini API:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name,
+          category: errorMessage,
+        });
+      } else {
+        console.error('Unknown error calling Gemini API:', error);
+      }
+
+      throw new Error(userFriendlyMessage);
     }
   }
 

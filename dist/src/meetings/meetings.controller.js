@@ -49,6 +49,8 @@ __decorate([
 ], MeetingsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('admin', 'superadmin'),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -56,8 +58,6 @@ __decorate([
 ], MeetingsController.prototype, "findAll", null);
 exports.MeetingsController = MeetingsController = __decorate([
     (0, common_1.Controller)('meetings'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('admin', 'superadmin'),
     __metadata("design:paramtypes", [meetings_service_1.MeetingsService])
 ], MeetingsController);
 //# sourceMappingURL=meetings.controller.js.map
