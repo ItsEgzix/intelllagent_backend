@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -67,8 +68,7 @@ export class AuthController {
   }
 
   @Patch('users/:id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('superadmin')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('avatar', {
       storage: diskStorage({
@@ -97,8 +97,19 @@ export class AuthController {
   async updateUser(
     @Param('id') id: string,
     @Body() body: any,
+    @Request() req: any,
     @UploadedFile() file?: any,
   ) {
+    // Allow users to update their own profile, or superadmins to update any profile
+    const userId = req.user?.id ?? req.user?.sub;
+    const userRole = req.user?.role;
+
+    if (userId !== id && userRole !== 'superadmin') {
+      throw new ForbiddenException(
+        'You can only update your own profile unless you are a superadmin',
+      );
+    }
+
     const updateUserDto: UpdateUserDto = {
       name: body.name,
       email: body.email,
