@@ -32,10 +32,4 @@ export declare class ChatbotController {
         createdAt: Date;
         lastActivity: Date;
     }[]>;
-    getAvailableLanguages(): Promise<{
-        languages: {
-            code: string;
-            name: string;
-        }[];
-    }>;
 }

@@ -1,15 +1,12 @@
 import { AgentsService } from '../agents/agents.service';
 import { MeetingsService } from '../meetings/meetings.service';
+import { TranslationsService } from '../translations/translations.service';
 import { convertTimezone } from '../email/templates/timezone-helper';
 import {
   validateWorkingHours,
   findAgentByNameOrEmail,
   calculateTimeDifference,
 } from './chatbot.validators';
-import {
-  translateWebsite,
-  getLanguageDisplayName,
-} from './chatbot.translations';
 
 /**
  * Services required for function execution
@@ -17,7 +14,7 @@ import {
 export interface FunctionServices {
   agentsService: AgentsService;
   meetingsService: MeetingsService;
-  geminiApiKey?: string; // Optional API key for translation functions
+  translationsService?: TranslationsService;
 }
 
 /**
@@ -300,12 +297,151 @@ export async function scheduleMeeting(
 }
 
 /**
+ * Translate website content to a different language using AI
+ */
+export async function translateWebsite(
+  params: {
+    targetLanguage: string;
+    sourceLanguage?: string;
+  },
+  services: FunctionServices,
+  genAI?: any, // Gemini AI instance
+): Promise<string> {
+  try {
+    if (!services.translationsService) {
+      return 'Translation service is not available. Please try again later.';
+    }
+
+    if (!genAI) {
+      return 'AI translation service is not available. Please ensure GEMINI_API_KEY is configured.';
+    }
+
+    const sourceLang = params.sourceLanguage || 'en';
+    const targetLang = params.targetLanguage.toLowerCase();
+
+    // Get source translation
+    let sourceTranslation;
+    try {
+      sourceTranslation =
+        await services.translationsService.getTranslationByCode(sourceLang);
+    } catch (error) {
+      return `Source language "${sourceLang}" not found. Please ensure English translations exist.`;
+    }
+
+    if (!sourceTranslation || !sourceTranslation.data) {
+      return `Source language "${sourceLang}" has no translation data.`;
+    }
+
+    const sourceData = sourceTranslation.data as Record<string, any>;
+
+    // Language display names mapping
+    const languageNames: Record<string, { native: string; english: string }> = {
+      en: { native: 'English', english: 'English' },
+      zh: { native: '中文', english: 'Chinese' },
+      ms: { native: 'Bahasa Melayu', english: 'Malay' },
+      fr: { native: 'Français', english: 'French' },
+      ja: { native: '日本語', english: 'Japanese' },
+      vi: { native: 'Tiếng Việt', english: 'Vietnamese' },
+      es: { native: 'Español', english: 'Spanish' },
+      de: { native: 'Deutsch', english: 'German' },
+      ar: { native: 'العربية', english: 'Arabic' },
+      hi: { native: 'हिन्दी', english: 'Hindi' },
+      pt: { native: 'Português', english: 'Portuguese' },
+      ru: { native: 'Русский', english: 'Russian' },
+      it: { native: 'Italiano', english: 'Italian' },
+      th: { native: 'ไทย', english: 'Thai' },
+      id: { native: 'Bahasa Indonesia', english: 'Indonesian' },
+      tr: { native: 'Türkçe', english: 'Turkish' },
+      pl: { native: 'Polski', english: 'Polish' },
+      nl: { native: 'Nederlands', english: 'Dutch' },
+    };
+
+    const targetLangInfo = languageNames[targetLang] || {
+      native: targetLang.toUpperCase(),
+      english: targetLang.toUpperCase(),
+    };
+
+    // Use Gemini to translate the JSON structure
+    const translationPrompt = `You are a professional translator. Translate the following JSON object from ${sourceLang} to ${targetLang} (${targetLangInfo.english}). 
+
+IMPORTANT RULES:
+1. Maintain the exact JSON structure - all keys must remain the same
+2. Only translate the VALUES, never the keys
+3. For nested objects, translate all string values recursively
+4. For arrays, translate string values but keep the structure
+5. Return ONLY valid JSON, no markdown, no explanations
+6. Preserve any special characters, placeholders, or formatting codes
+7. Keep the same data types (strings, numbers, booleans, arrays, objects)
+
+Source JSON:
+${JSON.stringify(sourceData, null, 2)}
+
+Return the translated JSON:`;
+
+    try {
+      const response = await genAI.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: [{ role: 'user', parts: [{ text: translationPrompt }] }],
+      });
+
+      let translatedText = '';
+      if (
+        response.candidates &&
+        response.candidates[0]?.content?.parts?.[0]?.text
+      ) {
+        translatedText = response.candidates[0].content.parts[0].text;
+      } else {
+        return 'Failed to get translation response from AI.';
+      }
+
+      // Clean up the response (remove markdown code blocks if present)
+      translatedText = translatedText
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+        .trim();
+
+      // Parse the translated JSON
+      let translatedData: Record<string, any>;
+      try {
+        translatedData = JSON.parse(translatedText);
+      } catch (parseError) {
+        console.error('Failed to parse translated JSON:', translatedText);
+        return `Failed to parse translated content. The AI may have returned invalid JSON. Please try again.`;
+      }
+
+      // Save to database
+      await services.translationsService.upsertTranslation(
+        targetLang,
+        translatedData,
+        targetLangInfo.native,
+        targetLangInfo.english,
+      );
+
+      return `Successfully translated the website to ${targetLangInfo.english} (${targetLangInfo.native})! The translations have been saved to the database. 
+
+To see the translated content, please click on the globe icon (🌐) in the header and select "${targetLangInfo.english}" from the language dropdown menu.`;
+    } catch (error) {
+      console.error('Error during AI translation:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      return `Failed to translate website: ${errorMessage}`;
+    }
+  } catch (error) {
+    console.error('Error translating website:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    return `Failed to translate website: ${errorMessage}`;
+  }
+}
+
+/**
  * Handle a function call by routing to the appropriate function
  */
 export async function handleFunctionCall(
   functionName: string,
   args: any,
   services: FunctionServices,
+  genAI?: any, // Gemini AI instance for translation
 ): Promise<string> {
   switch (functionName) {
     case 'list_agents':
@@ -335,36 +471,6 @@ export async function handleFunctionCall(
         },
         services,
       );
-    case 'translate_website':
-      if (!services.geminiApiKey) {
-        return 'Translation service is not available. Gemini API key is not configured.';
-      }
-      const targetLanguage = args.language as string;
-      if (!targetLanguage) {
-        return 'Language code is required. Please provide a valid ISO 639-1 language code (e.g., "fr", "es", "de").';
-      }
-      try {
-        const result = await translateWebsite(
-          targetLanguage,
-          services.geminiApiKey,
-        );
-        if (result.success) {
-          const languageName = getLanguageDisplayName(targetLanguage);
-          // Return a message that prompts the AI to set the locale
-          // The AI should automatically call set_locale after this
-          return `Website successfully translated to ${languageName} (${targetLanguage})! The translation file has been created and is now available. The website has been translated successfully. Now automatically switch the user's language to ${targetLanguage} by calling set_locale with locale="${targetLanguage}".`;
-        }
-        return `Translation failed: ${result.message}`;
-      } catch (error) {
-        console.error('Translation error:', error);
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error';
-        // Provide helpful error message
-        if (errorMessage.includes('Messages directory not found')) {
-          return `I am sorry, I was unable to translate the website because the translation files directory could not be found. This is a configuration issue. Please ensure the MESSAGES_DIRECTORY environment variable is set correctly, or that the messages folder exists in the expected location. Error: ${errorMessage}`;
-        }
-        return `Translation failed: ${errorMessage}. Please try again later or contact support if the issue persists.`;
-      }
     case 'set_locale':
       const locale = args.locale as string;
       if (!locale) {
@@ -372,6 +478,15 @@ export async function handleFunctionCall(
       }
       // Return a special marker that the frontend will detect and handle
       return `LOCALE_CHANGE:${locale}`;
+    case 'translate_website':
+      return await translateWebsite(
+        {
+          targetLanguage: args.targetLanguage as string,
+          sourceLanguage: args.sourceLanguage as string | undefined,
+        },
+        services,
+        genAI,
+      );
     default:
       return `Unknown function: ${functionName}`;
   }

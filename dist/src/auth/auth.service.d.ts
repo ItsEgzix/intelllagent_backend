@@ -12,10 +12,10 @@ export declare class AuthService implements OnModuleInit, OnModuleDestroy {
     register(registerDto: RegisterDto, requestingUserRole?: string): Promise<{
         access_token: string;
         user: {
-            email: string;
-            name: string | null;
             id: string;
+            email: string;
             createdAt: Date;
+            name: string | null;
             role: string;
         };
     }>;
@@ -34,10 +34,10 @@ export declare class AuthService implements OnModuleInit, OnModuleDestroy {
         };
     }>;
     validateUser(userId: string): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -45,11 +45,11 @@ export declare class AuthService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }>;
     findAllUsers(): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -57,11 +57,11 @@ export declare class AuthService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }[]>;
     updateUser(id: string, updateUserDto: UpdateUserDto): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;

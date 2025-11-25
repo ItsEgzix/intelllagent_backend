@@ -1,9 +1,10 @@
 import { AgentsService } from '../agents/agents.service';
 import { MeetingsService } from '../meetings/meetings.service';
+import { TranslationsService } from '../translations/translations.service';
 export interface FunctionServices {
     agentsService: AgentsService;
     meetingsService: MeetingsService;
-    geminiApiKey?: string;
+    translationsService?: TranslationsService;
 }
 export declare function getAvailableAgents(services: FunctionServices): Promise<string>;
 export declare function checkAgentAvailability(params: {
@@ -23,4 +24,8 @@ export declare function scheduleMeeting(params: {
     agentId?: string;
     agentName?: string;
 }, services: FunctionServices): Promise<string>;
-export declare function handleFunctionCall(functionName: string, args: any, services: FunctionServices): Promise<string>;
+export declare function translateWebsite(params: {
+    targetLanguage: string;
+    sourceLanguage?: string;
+}, services: FunctionServices, genAI?: any): Promise<string>;
+export declare function handleFunctionCall(functionName: string, args: any, services: FunctionServices, genAI?: any): Promise<string>;

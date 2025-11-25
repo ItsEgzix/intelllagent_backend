@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { MeetingsService } from '../meetings/meetings.service';
 import { AgentsService } from '../agents/agents.service';
+import { TranslationsService } from '../translations/translations.service';
 import { buildSystemPrompt } from './chatbot.prompts';
 import { getToolDefinitions } from './chatbot.tools';
 import { handleFunctionCall, FunctionServices } from './chatbot.functions';
@@ -29,6 +30,7 @@ export class ChatbotService implements OnModuleInit {
     private meetingsService: MeetingsService,
     @Inject(forwardRef(() => AgentsService))
     private agentsService: AgentsService,
+    private translationsService: TranslationsService,
   ) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -126,7 +128,6 @@ export class ChatbotService implements OnModuleInit {
       list_agents: 'Listing available agents',
       check_agent_availability: 'Checking agent availability',
       schedule_meeting: 'Scheduling meeting',
-      translate_website: 'Translating website',
       set_locale: 'Updating language preference',
     };
     return displayNames[functionName] || functionName;
@@ -204,7 +205,7 @@ export class ChatbotService implements OnModuleInit {
       const services: FunctionServices = {
         agentsService: this.agentsService,
         meetingsService: this.meetingsService,
-        geminiApiKey: process.env.GEMINI_API_KEY,
+        translationsService: this.translationsService,
       };
 
       const functionResults: any[] = [];
@@ -213,7 +214,12 @@ export class ChatbotService implements OnModuleInit {
         const functionName = funcCall.name;
         const args = funcCall.args || {};
 
-        const result = await handleFunctionCall(functionName, args, services);
+        const result = await handleFunctionCall(
+          functionName,
+          args,
+          services,
+          this.genAI,
+        );
 
         functionResults.push({
           functionResponse: {
@@ -347,14 +353,19 @@ export class ChatbotService implements OnModuleInit {
         const services: FunctionServices = {
           agentsService: this.agentsService,
           meetingsService: this.meetingsService,
-          geminiApiKey: process.env.GEMINI_API_KEY,
+          translationsService: this.translationsService,
         };
 
         for (const funcCall of functionCalls) {
           const functionName = funcCall.name;
           const args = funcCall.args || {};
 
-          const result = await handleFunctionCall(functionName, args, services);
+          const result = await handleFunctionCall(
+            functionName,
+            args,
+            services,
+            this.genAI,
+          );
 
           functionResults.push({
             functionResponse: {

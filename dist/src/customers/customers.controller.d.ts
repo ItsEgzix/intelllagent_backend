@@ -6,15 +6,14 @@ export declare class CustomersController {
     constructor(customersService: CustomersService);
     create(createCustomerDto: CreateCustomerDto, req: any): Promise<{
         admin: {
+            id: string;
             email: string;
             name: string | null;
-            id: string;
         } | null;
         meetings: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            agentId: string | null;
             customerDate: string;
             customerTime: string;
             customerTimezone: string;
@@ -22,31 +21,31 @@ export declare class CustomersController {
             agentTime: string | null;
             agentTimezone: string | null;
             customerId: string;
+            agentId: string | null;
         }[];
     } & {
-        email: string;
-        name: string;
-        level: string;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
         adminId: string | null;
         source: string;
+        level: string;
     }>;
     findAll(req: any): Promise<({
         admin: {
+            id: string;
             email: string;
             name: string | null;
-            id: string;
         } | null;
         meetings: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            agentId: string | null;
             customerDate: string;
             customerTime: string;
             customerTimezone: string;
@@ -54,31 +53,31 @@ export declare class CustomersController {
             agentTime: string | null;
             agentTimezone: string | null;
             customerId: string;
+            agentId: string | null;
         }[];
     } & {
-        email: string;
-        name: string;
-        level: string;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
         adminId: string | null;
         source: string;
+        level: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
         admin: {
+            id: string;
             email: string;
             name: string | null;
-            id: string;
         } | null;
         meetings: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            agentId: string | null;
             customerDate: string;
             customerTime: string;
             customerTimezone: string;
@@ -86,31 +85,31 @@ export declare class CustomersController {
             agentTime: string | null;
             agentTimezone: string | null;
             customerId: string;
+            agentId: string | null;
         }[];
     } & {
-        email: string;
-        name: string;
-        level: string;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
         adminId: string | null;
         source: string;
+        level: string;
     }>;
     update(id: string, updateCustomerDto: UpdateCustomerDto, req: any): Promise<{
         admin: {
+            id: string;
             email: string;
             name: string | null;
-            id: string;
         } | null;
         meetings: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            agentId: string | null;
             customerDate: string;
             customerTime: string;
             customerTimezone: string;
@@ -118,31 +117,32 @@ export declare class CustomersController {
             agentTime: string | null;
             agentTimezone: string | null;
             customerId: string;
+            agentId: string | null;
         }[];
     } & {
-        email: string;
-        name: string;
-        level: string;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
         adminId: string | null;
         source: string;
+        level: string;
     }>;
     remove(id: string, req: any): Promise<{
-        email: string;
-        name: string;
-        level: string;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
         adminId: string | null;
         source: string;
+        level: string;
     }>;
 }

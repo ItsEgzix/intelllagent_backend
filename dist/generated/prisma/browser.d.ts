@@ -6,3 +6,4 @@ export type Email = Prisma.EmailModel;
 export type Customer = Prisma.CustomerModel;
 export type Meeting = Prisma.MeetingModel;
 export type User = Prisma.UserModel;
+export type Translation = Prisma.TranslationModel;

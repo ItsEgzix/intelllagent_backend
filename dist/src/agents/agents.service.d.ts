@@ -6,11 +6,11 @@ export declare class AgentsService implements OnModuleInit, OnModuleDestroy {
     onModuleInit(): Promise<void>;
     onModuleDestroy(): Promise<void>;
     create(createAgentDto: CreateAgentDto): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -18,11 +18,11 @@ export declare class AgentsService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }>;
     findAll(): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -30,11 +30,11 @@ export declare class AgentsService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }[]>;
     findActive(): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -42,11 +42,11 @@ export declare class AgentsService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }[]>;
     findOne(id: string): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -54,11 +54,11 @@ export declare class AgentsService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }>;
     update(id: string, updateAgentDto: UpdateAgentDto): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -66,11 +66,11 @@ export declare class AgentsService implements OnModuleInit, OnModuleDestroy {
         isActive: boolean;
     }>;
     remove(id: string): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;

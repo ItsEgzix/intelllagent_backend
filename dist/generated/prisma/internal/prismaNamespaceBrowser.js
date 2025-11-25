@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NullsOrder = exports.QueryMode = exports.SortOrder = exports.UserScalarFieldEnum = exports.MeetingScalarFieldEnum = exports.CustomerScalarFieldEnum = exports.EmailScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.JsonNullValueFilter = exports.NullsOrder = exports.QueryMode = exports.JsonNullValueInput = exports.SortOrder = exports.TranslationScalarFieldEnum = exports.UserScalarFieldEnum = exports.MeetingScalarFieldEnum = exports.CustomerScalarFieldEnum = exports.EmailScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -48,7 +48,8 @@ exports.ModelName = {
     Email: 'Email',
     Customer: 'Customer',
     Meeting: 'Meeting',
-    User: 'User'
+    User: 'User',
+    Translation: 'Translation'
 };
 exports.TransactionIsolationLevel = {
     ReadUncommitted: 'ReadUncommitted',
@@ -101,9 +102,21 @@ exports.UserScalarFieldEnum = {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };
+exports.TranslationScalarFieldEnum = {
+    id: 'id',
+    code: 'code',
+    data: 'data',
+    nativeName: 'nativeName',
+    englishName: 'englishName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
 exports.SortOrder = {
     asc: 'asc',
     desc: 'desc'
+};
+exports.JsonNullValueInput = {
+    JsonNull: 'JsonNull'
 };
 exports.QueryMode = {
     default: 'default',
@@ -112,5 +125,10 @@ exports.QueryMode = {
 exports.NullsOrder = {
     first: 'first',
     last: 'last'
+};
+exports.JsonNullValueFilter = {
+    DbNull: 'DbNull',
+    JsonNull: 'JsonNull',
+    AnyNull: 'AnyNull'
 };
 //# sourceMappingURL=prismaNamespaceBrowser.js.map

@@ -8,14 +8,14 @@ export declare class EmailsService implements OnModuleInit, OnModuleDestroy {
     onModuleInit(): Promise<void>;
     onModuleDestroy(): Promise<void>;
     create(createEmailDto: CreateEmailDto): Promise<{
-        email: string;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
     findAll(): Promise<{
-        email: string;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
     }[]>;

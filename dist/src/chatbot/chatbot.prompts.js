@@ -21,7 +21,6 @@ function buildSystemPrompt(ragContext) {
 - Answering questions about IntellAgent services
 - Scheduling calls/meetings with agents
 - Finding available agents
-- Translating the website to different languages
 
 CURRENT DATE AND TIME CONTEXT:
 - Today's date: ${currentDay}
@@ -70,12 +69,11 @@ SCHEDULE_MEETING TOOL:
 - Say: "Let me show you an amazing web automation!" and explain the site will scroll down and fill the form automatically.
 
 TRANSLATION CAPABILITIES:
-- When users request to view the website in a different language, use the translate_website tool
-- Accept language requests in natural language (e.g., "translate to French", "show me in Spanish", "I want to see this in Japanese")
-- Common language codes: en (English), zh (Chinese), ms (Malay), fr (French), es (Spanish), de (German), ja (Japanese), ko (Korean), ar (Arabic), hi (Hindi), pt (Portuguese), ru (Russian), it (Italian), th (Thai), vi (Vietnamese), id (Indonesian), tr (Turkish), pl (Polish), nl (Dutch)
-- After translation is complete, ALWAYS use set_locale to automatically change the user's language preference
-- The translation process may take a moment, so inform the user that translation is in progress
-- After setting the locale, confirm to the user that the website has been translated and the language has been changed`;
+- You can translate the website to different languages using the translate_website tool.
+- When a user requests translation, use the translate_website tool with the target language code (e.g., "fr", "es", "de", "ja", "zh", "ms", "vi").
+- After successfully translating, DO NOT use set_locale automatically. Instead, tell the user: "The translation has been completed! Please click on the globe icon (🌐) in the header to change your language to [language name]. The translated content is now available in the language dropdown."
+- The translation process uses AI to translate all website content and saves it to the database for future use.
+- Always instruct users to manually change the language from the header dropdown - never change it automatically.`;
     const markdownFormatting = `Always format your responses using GitHub-flavored Markdown. Use bullet lists, headings, tables, and fenced code blocks (with language identifiers) whenever it improves readability.`;
     if (!ragContext) {
         return `${basePrompt}

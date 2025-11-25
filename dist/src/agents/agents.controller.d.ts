@@ -5,11 +5,11 @@ export declare class AgentsController {
     private readonly agentsService;
     constructor(agentsService: AgentsService);
     findActive(): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -17,11 +17,11 @@ export declare class AgentsController {
         isActive: boolean;
     }[]>;
     create(createAgentDto: CreateAgentDto): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -29,11 +29,11 @@ export declare class AgentsController {
         isActive: boolean;
     }>;
     findAll(): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -41,11 +41,11 @@ export declare class AgentsController {
         isActive: boolean;
     }[]>;
     findOne(id: string): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -53,11 +53,11 @@ export declare class AgentsController {
         isActive: boolean;
     }>;
     update(id: string, updateAgentDto: UpdateAgentDto): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -65,11 +65,11 @@ export declare class AgentsController {
         isActive: boolean;
     }>;
     remove(id: string): Promise<{
-        email: string;
-        name: string | null;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;

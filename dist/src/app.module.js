@@ -17,6 +17,7 @@ const agents_module_1 = require("./agents/agents.module");
 const chatbot_module_1 = require("./chatbot/chatbot.module");
 const customers_module_1 = require("./customers/customers.module");
 const uploads_controller_1 = require("./uploads/uploads.controller");
+const translations_module_1 = require("./translations/translations.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -29,6 +30,7 @@ exports.AppModule = AppModule = __decorate([
             agents_module_1.AgentsModule,
             chatbot_module_1.ChatbotModule,
             customers_module_1.CustomersModule,
+            translations_module_1.TranslationsModule,
         ],
         controllers: [app_controller_1.AppController, uploads_controller_1.UploadsController],
         providers: [app_service_1.AppService],

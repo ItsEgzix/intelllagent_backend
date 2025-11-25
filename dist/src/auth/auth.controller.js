@@ -45,7 +45,12 @@ let AuthController = class AuthController {
     async getAllUsers() {
         return this.authService.findAllUsers();
     }
-    async updateUser(id, body, file) {
+    async updateUser(id, body, req, file) {
+        const userId = req.user?.id ?? req.user?.sub;
+        const userRole = req.user?.role;
+        if (userId !== id && userRole !== 'superadmin') {
+            throw new common_1.ForbiddenException('You can only update your own profile unless you are a superadmin');
+        }
         const updateUserDto = {
             name: body.name,
             email: body.email,
@@ -103,8 +108,7 @@ __decorate([
 ], AuthController.prototype, "getAllUsers", null);
 __decorate([
     (0, common_1.Patch)('users/:id'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('superadmin'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('avatar', {
         storage: (0, multer_1.diskStorage)({
             destination: './uploads/avatars',
@@ -126,9 +130,10 @@ __decorate([
     })),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
-    __param(2, (0, common_1.UploadedFile)()),
+    __param(2, (0, common_1.Request)()),
+    __param(3, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:paramtypes", [String, Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "updateUser", null);
 exports.AuthController = AuthController = __decorate([

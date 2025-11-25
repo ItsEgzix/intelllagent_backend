@@ -95,22 +95,8 @@ function getToolDefinitions() {
                     },
                 },
                 {
-                    name: 'translate_website',
-                    description: "Translate the entire website to a target language. Use this when users request to view the website in a different language. The translation will create a new language file and make it available in the language dropdown. Common language codes: en (English), zh (Chinese), ms (Malay), fr (French), es (Spanish), de (German), ja (Japanese), ko (Korean), ar (Arabic), hi (Hindi), pt (Portuguese), ru (Russian), it (Italian), th (Thai), vi (Vietnamese), id (Indonesian), tr (Turkish), pl (Polish), nl (Dutch). After translation is complete, ALWAYS use set_locale to change the user's language preference.",
-                    parameters: {
-                        type: 'object',
-                        properties: {
-                            language: {
-                                type: 'string',
-                                description: 'ISO 639-1 language code (e.g., "fr" for French, "es" for Spanish, "de" for German). Use standard two-letter language codes.',
-                            },
-                        },
-                        required: ['language'],
-                    },
-                },
-                {
                     name: 'set_locale',
-                    description: "Change the user's language preference on the website. Use this after translating the website or when the user explicitly requests to change their language. This will update the website interface to display in the selected language.",
+                    description: "Change the user's language preference on the website. IMPORTANT: Only use this tool when the user explicitly asks you to change the language programmatically. Otherwise, always instruct users to change the language manually from the header dropdown (globe icon). This tool should rarely be used - prefer telling users to use the header dropdown.",
                     parameters: {
                         type: 'object',
                         properties: {
@@ -120,6 +106,24 @@ function getToolDefinitions() {
                             },
                         },
                         required: ['locale'],
+                    },
+                },
+                {
+                    name: 'translate_website',
+                    description: 'Translate the website content to a different language. Use this when the user asks to translate the website or create a new language version. This will generate translations for all website content using AI and save them to the database.',
+                    parameters: {
+                        type: 'object',
+                        properties: {
+                            targetLanguage: {
+                                type: 'string',
+                                description: 'Language code to translate to (e.g., "fr", "es", "de", "ja", "zh", "ms", "vi"). Must be a valid ISO 639-1 language code.',
+                            },
+                            sourceLanguage: {
+                                type: 'string',
+                                description: 'Optional: Source language code (defaults to "en" if not provided).',
+                            },
+                        },
+                        required: ['targetLanguage'],
                     },
                 },
             ],

@@ -72,3 +72,13 @@ model User {
   meetings     Meeting[]  // Meetings assigned to this agent
   customers    Customer[] @relation("CustomerAdmin") // Customers managed by this admin
 }
+
+model Translation {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  data        Json
+  nativeName  String?  // Display name in the language itself (e.g., "中文" for Chinese)
+  englishName String?  // Display name in English (e.g., "Chinese")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

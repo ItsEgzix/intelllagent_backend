@@ -8,6 +8,7 @@ import { AgentsModule } from './agents/agents.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { CustomersModule } from './customers/customers.module';
 import { UploadsController } from './uploads/uploads.controller';
+import { TranslationsModule } from './translations/translations.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UploadsController } from './uploads/uploads.controller';
     AgentsModule,
     ChatbotModule,
     CustomersModule,
+    TranslationsModule,
   ],
   controllers: [AppController, UploadsController],
   providers: [AppService],

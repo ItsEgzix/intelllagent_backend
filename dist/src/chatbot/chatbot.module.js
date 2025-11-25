@@ -12,12 +12,17 @@ const chatbot_controller_1 = require("./chatbot.controller");
 const chatbot_service_1 = require("./chatbot.service");
 const meetings_module_1 = require("../meetings/meetings.module");
 const agents_module_1 = require("../agents/agents.module");
+const translations_module_1 = require("../translations/translations.module");
 let ChatbotModule = class ChatbotModule {
 };
 exports.ChatbotModule = ChatbotModule;
 exports.ChatbotModule = ChatbotModule = __decorate([
     (0, common_1.Module)({
-        imports: [(0, common_1.forwardRef)(() => meetings_module_1.MeetingsModule), (0, common_1.forwardRef)(() => agents_module_1.AgentsModule)],
+        imports: [
+            (0, common_1.forwardRef)(() => meetings_module_1.MeetingsModule),
+            (0, common_1.forwardRef)(() => agents_module_1.AgentsModule),
+            translations_module_1.TranslationsModule,
+        ],
         controllers: [chatbot_controller_1.ChatbotController],
         providers: [chatbot_service_1.ChatbotService],
         exports: [chatbot_service_1.ChatbotService],

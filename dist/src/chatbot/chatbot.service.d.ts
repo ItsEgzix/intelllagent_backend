@@ -1,13 +1,15 @@
 import { OnModuleInit } from '@nestjs/common';
 import { MeetingsService } from '../meetings/meetings.service';
 import { AgentsService } from '../agents/agents.service';
+import { TranslationsService } from '../translations/translations.service';
 export declare class ChatbotService implements OnModuleInit {
     private meetingsService;
     private agentsService;
+    private translationsService;
     private genAI;
     private sessions;
     private ragContext;
-    constructor(meetingsService: MeetingsService, agentsService: AgentsService);
+    constructor(meetingsService: MeetingsService, agentsService: AgentsService, translationsService: TranslationsService);
     onModuleInit(): Promise<void>;
     private loadRAGContext;
     private getOrCreateSession;

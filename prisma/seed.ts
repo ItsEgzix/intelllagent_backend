@@ -2,6 +2,8 @@ import { PrismaClient } from '../generated/prisma/client';
 import { adapter } from '../prisma.config';
 import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Load environment variables
 dotenv.config();
@@ -77,7 +79,94 @@ async function main() {
     console.log('\n⚠️  Please change the default password after first login!');
   }
 
+  await seedTranslations();
+
   console.log('\n✨ Seed completed!');
+}
+
+// Language display names mapping
+const LANGUAGE_DISPLAY_NAMES: Record<
+  string,
+  { native: string; english: string }
+> = {
+  en: { native: 'English', english: 'English' },
+  zh: { native: '中文', english: 'Chinese' },
+  ms: { native: 'Bahasa Melayu', english: 'Malay' },
+  fr: { native: 'Français', english: 'French' },
+  ja: { native: '日本語', english: 'Japanese' },
+  vi: { native: 'Tiếng Việt', english: 'Vietnamese' },
+  es: { native: 'Español', english: 'Spanish' },
+  de: { native: 'Deutsch', english: 'German' },
+  ar: { native: 'العربية', english: 'Arabic' },
+  hi: { native: 'हिन्दी', english: 'Hindi' },
+  pt: { native: 'Português', english: 'Portuguese' },
+  ru: { native: 'Русский', english: 'Russian' },
+  it: { native: 'Italiano', english: 'Italian' },
+  th: { native: 'ไทย', english: 'Thai' },
+  id: { native: 'Bahasa Indonesia', english: 'Indonesian' },
+  tr: { native: 'Türkçe', english: 'Turkish' },
+  pl: { native: 'Polski', english: 'Polish' },
+  nl: { native: 'Nederlands', english: 'Dutch' },
+};
+
+async function seedTranslations() {
+  try {
+    const messagesDir = path.resolve(
+      __dirname,
+      '..',
+      '..',
+      'intellagent-webapp',
+      'messages',
+    );
+
+    if (!fs.existsSync(messagesDir)) {
+      console.warn(
+        '⚠️  Messages directory not found, skipping translations seed',
+      );
+      return;
+    }
+
+    const files = fs
+      .readdirSync(messagesDir)
+      .filter(
+        (file) =>
+          file.endsWith('.json') && file.toLowerCase() !== 'languages.json',
+      );
+
+    for (const file of files) {
+      const code = path.basename(file, '.json');
+      const fullPath = path.join(messagesDir, file);
+      const rawContent = fs.readFileSync(fullPath, 'utf-8');
+      const data = JSON.parse(rawContent);
+
+      // Get display names from mapping
+      const displayNames = LANGUAGE_DISPLAY_NAMES[code.toLowerCase()] || {
+        native: code.toUpperCase(),
+        english: code.toUpperCase(),
+      };
+
+      await prisma.translation.upsert({
+        where: { code },
+        update: {
+          data,
+          nativeName: displayNames.native,
+          englishName: displayNames.english,
+        },
+        create: {
+          code,
+          data,
+          nativeName: displayNames.native,
+          englishName: displayNames.english,
+        },
+      });
+
+      console.log(
+        `✅ Seeded translations for locale "${code}" (${displayNames.english})`,
+      );
+    }
+  } catch (error) {
+    console.error('❌ Failed to seed translations:', error);
+  }
 }
 
 main()
