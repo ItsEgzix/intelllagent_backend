@@ -5,11 +5,6 @@ export declare class CustomersService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     create(createCustomerDto: CreateCustomerDto, adminId: string): Promise<{
-        admin: {
-            email: string;
-            name: string | null;
-            id: string;
-        } | null;
         meetings: {
             id: string;
             createdAt: Date;
@@ -23,12 +18,17 @@ export declare class CustomersService {
             agentTimezone: string | null;
             customerId: string;
         }[];
+        admin: {
+            email: string;
+            id: string;
+            name: string | null;
+        } | null;
     } & {
         email: string;
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
@@ -37,11 +37,6 @@ export declare class CustomersService {
         level: string;
     }>;
     findAll(adminId?: string): Promise<({
-        admin: {
-            email: string;
-            name: string | null;
-            id: string;
-        } | null;
         meetings: {
             id: string;
             createdAt: Date;
@@ -55,12 +50,17 @@ export declare class CustomersService {
             agentTimezone: string | null;
             customerId: string;
         }[];
+        admin: {
+            email: string;
+            id: string;
+            name: string | null;
+        } | null;
     } & {
         email: string;
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
@@ -69,11 +69,6 @@ export declare class CustomersService {
         level: string;
     })[]>;
     findOne(id: string, adminId?: string): Promise<{
-        admin: {
-            email: string;
-            name: string | null;
-            id: string;
-        } | null;
         meetings: {
             id: string;
             createdAt: Date;
@@ -87,12 +82,17 @@ export declare class CustomersService {
             agentTimezone: string | null;
             customerId: string;
         }[];
+        admin: {
+            email: string;
+            id: string;
+            name: string | null;
+        } | null;
     } & {
         email: string;
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
@@ -101,11 +101,6 @@ export declare class CustomersService {
         level: string;
     }>;
     update(id: string, updateCustomerDto: UpdateCustomerDto, adminId?: string): Promise<{
-        admin: {
-            email: string;
-            name: string | null;
-            id: string;
-        } | null;
         meetings: {
             id: string;
             createdAt: Date;
@@ -119,12 +114,17 @@ export declare class CustomersService {
             agentTimezone: string | null;
             customerId: string;
         }[];
+        admin: {
+            email: string;
+            id: string;
+            name: string | null;
+        } | null;
     } & {
         email: string;
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
@@ -134,10 +134,10 @@ export declare class CustomersService {
     }>;
     remove(id: string, adminId?: string): Promise<{
         email: string;
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;

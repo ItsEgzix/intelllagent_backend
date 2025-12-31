@@ -12,19 +12,19 @@ export declare class TranslationsController {
         englishName: string | null;
     }[]>;
     getTranslation(code: string): Promise<{
-        data: import("@prisma/client/runtime/client").JsonValue;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        data: import("@prisma/client/runtime/client").JsonValue;
         code: string;
         nativeName: string | null;
         englishName: string | null;
     }>;
     upsertTranslation(code: string, updateTranslationDto: UpdateTranslationDto): Promise<{
-        data: import("@prisma/client/runtime/client").JsonValue;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        data: import("@prisma/client/runtime/client").JsonValue;
         code: string;
         nativeName: string | null;
         englishName: string | null;

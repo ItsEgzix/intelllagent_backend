@@ -16,6 +16,7 @@ export declare const ModelName: {
     readonly Meeting: "Meeting";
     readonly User: "User";
     readonly Translation: "Translation";
+    readonly Setting: "Setting";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export declare const TransactionIsolationLevel: {
@@ -84,6 +85,15 @@ export declare const TranslationScalarFieldEnum: {
     readonly updatedAt: "updatedAt";
 };
 export type TranslationScalarFieldEnum = (typeof TranslationScalarFieldEnum)[keyof typeof TranslationScalarFieldEnum];
+export declare const SettingScalarFieldEnum: {
+    readonly id: "id";
+    readonly key: "key";
+    readonly value: "value";
+    readonly description: "description";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+};
+export type SettingScalarFieldEnum = (typeof SettingScalarFieldEnum)[keyof typeof SettingScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: "asc";
     readonly desc: "desc";

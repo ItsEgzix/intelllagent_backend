@@ -5,12 +5,13 @@ import { getAdminMeetingNotificationTemplate } from './templates/admin-meeting-n
 import { getClientMeetingConfirmationTemplate } from './templates/client-meeting-confirmation.template';
 import { getAgentMeetingNotificationTemplate } from './templates/agent-meeting-notification.template';
 import { calculateKLTime } from './templates/timezone-helper';
+import { SettingsService } from '../settings/settings.service';
 
 @Injectable()
 export class EmailService {
   private transporter: nodemailer.Transporter;
 
-  constructor() {
+  constructor(private readonly settingsService: SettingsService) {
     // Only create transporter if SMTP credentials are provided
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
       this.transporter = nodemailer.createTransport({
@@ -40,10 +41,25 @@ export class EmailService {
       return { success: false, reason: 'SMTP not configured' };
     }
 
+    // Check if welcome emails are enabled
+    const isEnabled = await this.settingsService.isEmailNotifyWelcomeEnabled();
+    if (!isEnabled) {
+      console.warn('Welcome emails are disabled in settings');
+      return { success: false, reason: 'Welcome emails disabled' };
+    }
+
     const { html, attachments } = getWelcomeEmailTemplate();
 
+    // Get sender configuration
+    const fromAddress =
+      (await this.settingsService.getEmailFromAddress()) ||
+      process.env.SMTP_FROM ||
+      process.env.SMTP_USER;
+    const fromName = await this.settingsService.getEmailFromName();
+    const from = fromName ? `${fromName} <${fromAddress}>` : fromAddress;
+
     const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      from,
       to,
       subject: 'Welcome to IntellAgent Newsletter! 🚀',
       html,
@@ -67,13 +83,28 @@ export class EmailService {
       return { success: false, reason: 'SMTP not configured' };
     }
 
-    const html = getAdminMeetingNotificationTemplate(meeting, calculateKLTime);
+    const { html, attachments } = getAdminMeetingNotificationTemplate(
+      meeting,
+      calculateKLTime,
+    );
+
+    // Subject line (hardcoded)
+    const subject = `Meeting Scheduled - ${meeting.customer?.name || 'Client'} with ${meeting.agent?.name || 'Agent'} - ${meeting.customerDate} at ${meeting.customerTime}`;
+
+    // Get sender configuration
+    const fromAddress =
+      (await this.settingsService.getEmailFromAddress()) ||
+      process.env.SMTP_FROM ||
+      process.env.SMTP_USER;
+    const fromName = await this.settingsService.getEmailFromName();
+    const from = fromName ? `${fromName} <${fromAddress}>` : fromAddress;
 
     const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      from,
       to: adminEmail,
-      subject: `New Meeting Request - ${meeting.date} at ${meeting.time} (${meeting.timezone})`,
+      subject,
       html,
+      attachments,
     };
 
     try {
@@ -93,12 +124,28 @@ export class EmailService {
       return { success: false, reason: 'SMTP not configured' };
     }
 
+    if (!meeting.customer || !meeting.customer.email) {
+      console.warn('No customer email found for meeting confirmation');
+      return { success: false, reason: 'No customer email' };
+    }
+
     const { html, attachments } = getClientMeetingConfirmationTemplate(meeting);
 
+    // Subject line (hardcoded)
+    const subject = `Meeting Scheduled - ${meeting.customerDate} at ${meeting.customerTime}`;
+
+    // Get sender configuration
+    const fromAddress =
+      (await this.settingsService.getEmailFromAddress()) ||
+      process.env.SMTP_FROM ||
+      process.env.SMTP_USER;
+    const fromName = await this.settingsService.getEmailFromName();
+    const from = fromName ? `${fromName} <${fromAddress}>` : fromAddress;
+
     const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to: meeting.email,
-      subject: `Meeting Scheduled - ${meeting.date} at ${meeting.time}`,
+      from,
+      to: meeting.customer.email,
+      subject,
       html,
       attachments,
     };
@@ -127,10 +174,21 @@ export class EmailService {
 
     const html = getAgentMeetingNotificationTemplate(meeting);
 
+    // Subject line (hardcoded)
+    const subject = `New Meeting Scheduled - ${meeting.customerDate} at ${meeting.customerTime}`;
+
+    // Get sender configuration
+    const fromAddress =
+      (await this.settingsService.getEmailFromAddress()) ||
+      process.env.SMTP_FROM ||
+      process.env.SMTP_USER;
+    const fromName = await this.settingsService.getEmailFromName();
+    const from = fromName ? `${fromName} <${fromAddress}>` : fromAddress;
+
     const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      from,
       to: meeting.agent.email,
-      subject: `New Meeting Scheduled - ${meeting.date} at ${meeting.time}`,
+      subject,
       html,
     };
 

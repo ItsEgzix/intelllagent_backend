@@ -40,9 +40,20 @@ function getClientMeetingConfirmationTemplate(meeting) {
     const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
     const attachments = [];
     const projectRoot = process.cwd();
-    const logoPath = path.join(projectRoot, 'src', 'images', 'intellagent_logo_png.png');
-    let logoUrl = `${baseUrl}/logo/intellagent_logo_png.png`;
-    if (fs.existsSync(logoPath)) {
+    const possiblePaths = [
+        path.join(projectRoot, 'src', 'images', 'intellagent_logo.png'),
+        path.join(projectRoot, 'dist', 'images', 'intellagent_logo.png'),
+        path.join(projectRoot, 'images', 'intellagent_logo.png'),
+    ];
+    let logoPath = null;
+    for (const possiblePath of possiblePaths) {
+        if (fs.existsSync(possiblePath)) {
+            logoPath = possiblePath;
+            break;
+        }
+    }
+    let logoUrl = `${baseUrl}/logo/intellagent_logo.png`;
+    if (logoPath) {
         attachments.push({
             filename: 'intellagent-logo.png',
             path: logoPath,

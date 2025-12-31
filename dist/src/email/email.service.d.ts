@@ -1,6 +1,8 @@
+import { SettingsService } from '../settings/settings.service';
 export declare class EmailService {
+    private readonly settingsService;
     private transporter;
-    constructor();
+    constructor(settingsService: SettingsService);
     sendWelcomeEmail(to: string): Promise<{
         success: boolean;
         reason: string;

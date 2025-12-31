@@ -16,9 +16,9 @@ export function getWelcomeEmailTemplate(): {
   // Try multiple paths: dist/images, src/images, and project root images
   const projectRoot = process.cwd();
   const possiblePaths = [
-    path.join(projectRoot, 'src', 'images', 'intellagent_logo_png.png'), // src/images (most reliable)
-    path.join(projectRoot, 'dist', 'images', 'intellagent_logo_png.png'), // dist/images
-    path.join(projectRoot, 'images', 'intellagent_logo_png.png'), // project root images
+    path.join(projectRoot, 'src', 'images', 'intellagent_logo.png'), // src/images (most reliable)
+    path.join(projectRoot, 'dist', 'images', 'intellagent_logo.png'), // dist/images
+    path.join(projectRoot, 'images', 'intellagent_logo.png'), // project root images
   ];
 
   // Unique CIDs for images (must be globally unique within the message)
@@ -62,7 +62,7 @@ export function getWelcomeEmailTemplate(): {
         contentDisposition: 'inline',
       });
     } else {
-      logoUrl = `${baseUrl}/logo/intellagent_logo_png.png`;
+      logoUrl = `${baseUrl}/logo/intellagent_logo.png`;
     }
 
     if (yellowSquarePath) {

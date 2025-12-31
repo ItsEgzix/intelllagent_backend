@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.defineExtension = exports.JsonNullValueFilter = exports.NullsOrder = exports.QueryMode = exports.JsonNullValueInput = exports.SortOrder = exports.TranslationScalarFieldEnum = exports.UserScalarFieldEnum = exports.MeetingScalarFieldEnum = exports.CustomerScalarFieldEnum = exports.EmailScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.prismaVersion = exports.getExtensionContext = exports.Decimal = exports.Sql = exports.raw = exports.join = exports.empty = exports.sql = exports.PrismaClientValidationError = exports.PrismaClientInitializationError = exports.PrismaClientRustPanicError = exports.PrismaClientUnknownRequestError = exports.PrismaClientKnownRequestError = void 0;
+exports.defineExtension = exports.JsonNullValueFilter = exports.NullsOrder = exports.QueryMode = exports.JsonNullValueInput = exports.SortOrder = exports.SettingScalarFieldEnum = exports.TranslationScalarFieldEnum = exports.UserScalarFieldEnum = exports.MeetingScalarFieldEnum = exports.CustomerScalarFieldEnum = exports.EmailScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.prismaVersion = exports.getExtensionContext = exports.Decimal = exports.Sql = exports.raw = exports.join = exports.empty = exports.sql = exports.PrismaClientValidationError = exports.PrismaClientInitializationError = exports.PrismaClientRustPanicError = exports.PrismaClientUnknownRequestError = exports.PrismaClientKnownRequestError = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/client"));
 exports.PrismaClientKnownRequestError = runtime.PrismaClientKnownRequestError;
 exports.PrismaClientUnknownRequestError = runtime.PrismaClientUnknownRequestError;
@@ -64,7 +64,8 @@ exports.ModelName = {
     Customer: 'Customer',
     Meeting: 'Meeting',
     User: 'User',
-    Translation: 'Translation'
+    Translation: 'Translation',
+    Setting: 'Setting'
 };
 exports.TransactionIsolationLevel = runtime.makeStrictEnum({
     ReadUncommitted: 'ReadUncommitted',
@@ -123,6 +124,14 @@ exports.TranslationScalarFieldEnum = {
     data: 'data',
     nativeName: 'nativeName',
     englishName: 'englishName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.SettingScalarFieldEnum = {
+    id: 'id',
+    key: 'key',
+    value: 'value',
+    description: 'description',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };

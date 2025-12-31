@@ -8,6 +8,12 @@ import { TranslationsService } from '../translations/translations.service';
 import { buildSystemPrompt } from './chatbot.prompts';
 import { getToolDefinitions } from './chatbot.tools';
 import { handleFunctionCall, FunctionServices } from './chatbot.functions';
+import { GEMINI_CONFIG, validateGeminiConfig } from './chatbot.config';
+import {
+  retryWithBackoff,
+  parseRetryDelay,
+  isRateLimitError,
+} from './chatbot.utils';
 
 interface ChatSession {
   sessionId: string;
@@ -24,6 +30,14 @@ export class ChatbotService implements OnModuleInit {
   private genAI: GoogleGenAI;
   private sessions: Map<string, ChatSession> = new Map();
   private ragContext: string = '';
+  private requestQueue: Array<{
+    resolve: (value: any) => void;
+    reject: (error: any) => void;
+    fn: () => Promise<any>;
+  }> = [];
+  private isProcessingQueue = false;
+  private lastRequestTime = 0;
+  private readonly MIN_REQUEST_INTERVAL = GEMINI_CONFIG.MIN_REQUEST_INTERVAL;
 
   constructor(
     @Inject(forwardRef(() => MeetingsService))
@@ -32,13 +46,14 @@ export class ChatbotService implements OnModuleInit {
     private agentsService: AgentsService,
     private translationsService: TranslationsService,
   ) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
+    validateGeminiConfig();
+
+    if (!GEMINI_CONFIG.API_KEY) {
       console.warn('GEMINI_API_KEY not found in environment variables');
       // Don't throw error, just log warning - service will throw when used
     } else {
       try {
-        this.genAI = new GoogleGenAI({ apiKey });
+        this.genAI = new GoogleGenAI({ apiKey: GEMINI_CONFIG.API_KEY });
       } catch (error) {
         console.error('Failed to initialize GoogleGenAI:', error);
         // Don't throw, will be handled in sendMessage
@@ -140,25 +155,34 @@ export class ChatbotService implements OnModuleInit {
     session: ChatSession,
     systemPrompt: string,
     tools: any[],
-    maxIterations: number = 5,
+    maxIterations: number = GEMINI_CONFIG.SESSION.MAX_ITERATIONS,
   ): Promise<string | null> {
     if (maxIterations <= 0) {
       console.warn('Max iterations reached in processResponseRecursively');
       return null; // Prevent infinite loops
     }
 
-    // Use retry logic for network errors
-    const response = await this.retryWithBackoff(() =>
-      this.genAI.models.generateContent({
-        model: 'gemini-2.0-flash',
-        config: {
-          systemInstruction: {
-            parts: [{ text: systemPrompt }],
-          },
-          tools,
+    // Use throttling + retry logic for API calls
+    const response = await this.throttleRequest(() =>
+      retryWithBackoff(
+        () =>
+          this.genAI.models.generateContent({
+            model: GEMINI_CONFIG.MODEL,
+            config: {
+              systemInstruction: {
+                parts: [{ text: systemPrompt }],
+              },
+              tools,
+            },
+            contents: session.history,
+          }),
+        {
+          maxRetries: GEMINI_CONFIG.RETRY.MAX_RETRIES,
+          initialDelay: GEMINI_CONFIG.RETRY.INITIAL_DELAY,
+          maxDelay: GEMINI_CONFIG.RETRY.MAX_DELAY,
+          context: 'Chat',
         },
-        contents: session.history,
-      }),
+      ),
     );
 
     // Extract text from response
@@ -289,39 +313,53 @@ export class ChatbotService implements OnModuleInit {
   }
 
   /**
-   * Retry helper for API calls with exponential backoff
+   * Throttle API requests to prevent quota exhaustion
+   * Ensures minimum interval between requests
    */
-  private async retryWithBackoff<T>(
-    fn: () => Promise<T>,
-    maxRetries: number = 3,
-    initialDelay: number = 1000,
-  ): Promise<T> {
-    let lastError: Error | unknown;
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        return await fn();
-      } catch (error) {
-        lastError = error;
-        const isNetworkError =
-          error instanceof Error &&
-          (error.message.includes('fetch failed') ||
-            error.message.includes('ECONNREFUSED') ||
-            error.message.includes('ETIMEDOUT') ||
-            error.message.includes('ENOTFOUND'));
+  private async throttleRequest<T>(fn: () => Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.requestQueue.push({ resolve, reject, fn });
+      this.processQueue();
+    });
+  }
 
-        // Only retry on network errors, not on API errors
-        if (isNetworkError && attempt < maxRetries - 1) {
-          const delay = initialDelay * Math.pow(2, attempt);
-          console.warn(
-            `Network error on attempt ${attempt + 1}/${maxRetries}, retrying in ${delay}ms...`,
-          );
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          continue;
+  /**
+   * Process request queue with throttling
+   */
+  private async processQueue(): Promise<void> {
+    if (this.isProcessingQueue || this.requestQueue.length === 0) {
+      return;
+    }
+
+    this.isProcessingQueue = true;
+
+    while (this.requestQueue.length > 0) {
+      const request = this.requestQueue.shift();
+      if (!request) break;
+
+      try {
+        // Calculate delay needed to maintain minimum interval
+        const now = Date.now();
+        const timeSinceLastRequest = now - this.lastRequestTime;
+        const delayNeeded = Math.max(
+          0,
+          this.MIN_REQUEST_INTERVAL - timeSinceLastRequest,
+        );
+
+        if (delayNeeded > 0) {
+          await new Promise((resolve) => setTimeout(resolve, delayNeeded));
         }
-        throw error;
+
+        // Execute the request
+        const result = await request.fn();
+        this.lastRequestTime = Date.now();
+        request.resolve(result);
+      } catch (error) {
+        request.reject(error);
       }
     }
-    throw lastError;
+
+    this.isProcessingQueue = false;
   }
 
   async sendMessage(
@@ -357,18 +395,20 @@ export class ChatbotService implements OnModuleInit {
         },
       ] as any[];
 
-      // Use retry logic for network errors
-      const response = await this.retryWithBackoff(() =>
-        this.genAI.models.generateContent({
-          model: 'gemini-2.0-flash',
-          config: {
-            systemInstruction: {
-              parts: [{ text: systemPrompt }],
+      // Use throttling + retry logic for API calls
+      const response = await this.throttleRequest(() =>
+        retryWithBackoff(() =>
+          this.genAI.models.generateContent({
+            model: GEMINI_CONFIG.MODEL,
+            config: {
+              systemInstruction: {
+                parts: [{ text: systemPrompt }],
+              },
+              tools,
             },
-            tools,
-          },
-          contents,
-        }),
+            contents,
+          }),
+        ),
       );
 
       // Check if response has function calls
@@ -443,6 +483,7 @@ export class ChatbotService implements OnModuleInit {
           session,
           systemPrompt,
           tools,
+          GEMINI_CONFIG.SESSION.MAX_ITERATIONS,
         );
 
         if (finalResponseText) {
@@ -454,8 +495,12 @@ export class ChatbotService implements OnModuleInit {
           session.lastActivity = new Date();
 
           // Limit history
-          if (session.history.length > 20) {
-            session.history = session.history.slice(-20);
+          if (
+            session.history.length > GEMINI_CONFIG.SESSION.MAX_HISTORY_LENGTH
+          ) {
+            session.history = session.history.slice(
+              -GEMINI_CONFIG.SESSION.MAX_HISTORY_LENGTH,
+            );
           }
 
           return {
@@ -479,8 +524,12 @@ export class ChatbotService implements OnModuleInit {
           session.lastActivity = new Date();
 
           // Limit history
-          if (session.history.length > 20) {
-            session.history = session.history.slice(-20);
+          if (
+            session.history.length > GEMINI_CONFIG.SESSION.MAX_HISTORY_LENGTH
+          ) {
+            session.history = session.history.slice(
+              -GEMINI_CONFIG.SESSION.MAX_HISTORY_LENGTH,
+            );
           }
 
           return {
@@ -513,8 +562,12 @@ export class ChatbotService implements OnModuleInit {
           session.lastActivity = new Date();
 
           // Limit history
-          if (session.history.length > 20) {
-            session.history = session.history.slice(-20);
+          if (
+            session.history.length > GEMINI_CONFIG.SESSION.MAX_HISTORY_LENGTH
+          ) {
+            session.history = session.history.slice(
+              -GEMINI_CONFIG.SESSION.MAX_HISTORY_LENGTH,
+            );
           }
 
           return {
@@ -546,6 +599,15 @@ export class ChatbotService implements OnModuleInit {
           userFriendlyMessage =
             "I'm having trouble connecting to the AI service. Please check your internet connection and try again.";
         }
+        // Model not found errors
+        else if (
+          errorMsg.includes('not found') ||
+          errorMsg.includes('404') ||
+          errorMsg.includes('not supported')
+        ) {
+          errorMessage = `Model not found: ${GEMINI_CONFIG.MODEL}`;
+          userFriendlyMessage = `The AI model "${GEMINI_CONFIG.MODEL}" is not available. Please check your GEMINI_MODEL environment variable. Valid models: gemini-pro, gemini-1.5-pro, gemini-1.5-flash`;
+        }
         // Authentication errors
         else if (
           errorMsg.includes('api key') ||
@@ -557,15 +619,24 @@ export class ChatbotService implements OnModuleInit {
           userFriendlyMessage =
             'AI service authentication failed. Please contact support.';
         }
-        // Rate limiting
+        // Rate limiting / Quota exceeded
         else if (
           errorMsg.includes('rate limit') ||
           errorMsg.includes('429') ||
-          errorMsg.includes('quota')
+          errorMsg.includes('quota') ||
+          errorMsg.includes('resource_exhausted')
         ) {
-          errorMessage = 'Rate limit exceeded';
-          userFriendlyMessage =
-            'Too many requests. Please wait a moment and try again.';
+          errorMessage = 'Rate limit or quota exceeded';
+
+          // Try to extract retry delay from error
+          const retryDelay = parseRetryDelay(error);
+          if (retryDelay) {
+            const retrySeconds = Math.ceil(retryDelay / 1000);
+            userFriendlyMessage = `The AI service has reached its rate limit. Please wait ${retrySeconds} seconds and try again. If this persists, the daily quota may have been exceeded.`;
+          } else {
+            userFriendlyMessage =
+              'The AI service has reached its rate limit or daily quota. Please wait a few minutes and try again. If this issue persists, please contact support.';
+          }
         }
         // Other errors
         else {

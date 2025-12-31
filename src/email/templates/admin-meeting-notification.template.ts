@@ -1,8 +1,60 @@
+import * as nodemailer from 'nodemailer';
+import * as fs from 'fs';
+import * as path from 'path';
+
 export function getAdminMeetingNotificationTemplate(
   meeting: any,
   calculateKLTime: (date: string, time: string, timezone: string) => string,
-): string {
-  return `
+): {
+  html: string;
+  attachments: nodemailer.SendMailOptions['attachments'];
+} {
+  const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+  const attachments: NonNullable<nodemailer.SendMailOptions['attachments']> =
+    [];
+
+  // Add logo
+  const projectRoot = process.cwd();
+  const possiblePaths = [
+    path.join(projectRoot, 'src', 'images', 'intellagent_logo.png'),
+    path.join(projectRoot, 'dist', 'images', 'intellagent_logo.png'),
+    path.join(projectRoot, 'images', 'intellagent_logo.png'),
+    // Add relative path fallback
+    path.join(__dirname, '..', '..', 'images', 'intellagent_logo.png'),
+    path.join(__dirname, '..', '..', '..', 'images', 'intellagent_logo.png'),
+  ];
+
+  let logoPath: string | null = null;
+  for (const possiblePath of possiblePaths) {
+    if (fs.existsSync(possiblePath)) {
+      logoPath = possiblePath;
+      break;
+    }
+  }
+
+  if (!logoPath) {
+    console.warn(
+      '⚠️  Logo file not found in any expected path:',
+      possiblePaths,
+    );
+  } else {
+    // console.log('✅ Logo found at:', logoPath);
+  }
+
+  let logoUrl = `${baseUrl}/logo/intellagent_logo.png`;
+
+  if (logoPath) {
+    attachments.push({
+      filename: 'intellagent-logo.png',
+      path: logoPath,
+      cid: 'intellagent-logo@intellagent.com',
+      contentType: 'image/png',
+      contentDisposition: 'inline',
+    });
+    logoUrl = 'cid:intellagent-logo@intellagent.com';
+  }
+
+  const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,8 +86,13 @@ export function getAdminMeetingNotificationTemplate(
         
         .email-header {
             background-color: #ffffff;
-            padding: 30px;
-            text-align: center;
+            padding: 40px 30px 20px;
+            text-align: left;
+        }
+        
+        .logo {
+            max-width: 180px;
+            height: auto;
         }
         
         .email-content {
@@ -90,35 +147,35 @@ export function getAdminMeetingNotificationTemplate(
 <body>
     <div class="email-container">
         <div class="email-header">
-            <h1>New Meeting Request</h1>
+            <img src="${logoUrl}" alt="IntellAgent Logo" class="logo" />
         </div>
         
         <div class="email-content">
-            <p style="margin-bottom: 20px;">You have received a new meeting request:</p>
+            <p style="margin-bottom: 20px;">A meeting has been scheduled:</p>
             
             <div class="meeting-details">
                 <div class="detail-row">
-                    <span class="detail-label">Customer:</span>
-                    <span class="detail-value">${meeting.customer?.name || 'N/A'}</span>
+                    <span class="detail-label">Client:</span>
+                    <span class="detail-value"><strong>${meeting.customer?.name || 'N/A'}</strong></span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Email:</span>
+                    <span class="detail-label">Client Email:</span>
                     <span class="detail-value">${meeting.customer?.email || 'N/A'}</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Phone:</span>
+                    <span class="detail-label">Client Phone:</span>
                     <span class="detail-value">${meeting.customer?.phone || 'N/A'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Customer Time:</span>
-                    <span class="detail-value">${meeting.customerDate} at ${meeting.customerTime} (${meeting.customerTimezone})</span>
                 </div>
                 ${
                   meeting.agent
                     ? `
-                <div class="detail-row">
+                <div class="detail-row" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
                     <span class="detail-label">Assigned Agent:</span>
-                    <span class="detail-value">${meeting.agent.name || meeting.agent.email} (${meeting.agent.timezone || 'N/A'})</span>
+                    <span class="detail-value"><strong>${meeting.agent.name || meeting.agent.email}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Agent Email:</span>
+                    <span class="detail-value">${meeting.agent.email || 'N/A'}</span>
                 </div>
                 ${
                   meeting.agentDate && meeting.agentTime
@@ -131,17 +188,30 @@ export function getAdminMeetingNotificationTemplate(
                     : ''
                 }
                 `
-                    : ''
+                    : `
+                <div class="detail-row" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                    <span class="detail-label">Agent:</span>
+                    <span class="detail-value" style="color: #999;">No agent assigned yet</span>
+                </div>
+                `
                 }
+                <div class="detail-row" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                    <span class="detail-label">Meeting Time:</span>
+                    <span class="detail-value">${meeting.customerDate} at ${meeting.customerTime} (${meeting.customerTimezone})</span>
+                </div>
                 
                 <div class="kl-time-section">
-                    <p style="font-weight: bold; margin-bottom: 10px;">Management Time (Kuala Lumpur):</p>
+                    <p style="font-weight: bold; margin-bottom: 10px;">Kuala Lumpur Time:</p>
                     <div class="detail-row">
                         <span class="detail-label">KL Time:</span>
                         <span class="detail-value">${calculateKLTime(meeting.customerDate, meeting.customerTime, meeting.customerTimezone)}</span>
                     </div>
                 </div>
             </div>
+            
+            <p style="margin-top: 30px; color: #666666; font-size: 14px;">
+                This is an informational notification. The meeting will be conducted between the client and assigned agent.
+            </p>
         </div>
         
         <div class="email-footer">
@@ -151,4 +221,6 @@ export function getAdminMeetingNotificationTemplate(
 </body>
 </html>
   `;
+
+  return { html, attachments };
 }

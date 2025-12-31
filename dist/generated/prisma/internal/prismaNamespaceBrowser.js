@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.JsonNullValueFilter = exports.NullsOrder = exports.QueryMode = exports.JsonNullValueInput = exports.SortOrder = exports.TranslationScalarFieldEnum = exports.UserScalarFieldEnum = exports.MeetingScalarFieldEnum = exports.CustomerScalarFieldEnum = exports.EmailScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.JsonNullValueFilter = exports.NullsOrder = exports.QueryMode = exports.JsonNullValueInput = exports.SortOrder = exports.SettingScalarFieldEnum = exports.TranslationScalarFieldEnum = exports.UserScalarFieldEnum = exports.MeetingScalarFieldEnum = exports.CustomerScalarFieldEnum = exports.EmailScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -49,7 +49,8 @@ exports.ModelName = {
     Customer: 'Customer',
     Meeting: 'Meeting',
     User: 'User',
-    Translation: 'Translation'
+    Translation: 'Translation',
+    Setting: 'Setting'
 };
 exports.TransactionIsolationLevel = {
     ReadUncommitted: 'ReadUncommitted',
@@ -108,6 +109,14 @@ exports.TranslationScalarFieldEnum = {
     data: 'data',
     nativeName: 'nativeName',
     englishName: 'englishName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.SettingScalarFieldEnum = {
+    id: 'id',
+    key: 'key',
+    value: 'value',
+    description: 'description',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };

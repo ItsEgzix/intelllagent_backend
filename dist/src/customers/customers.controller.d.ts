@@ -5,11 +5,6 @@ export declare class CustomersController {
     private readonly customersService;
     constructor(customersService: CustomersService);
     create(createCustomerDto: CreateCustomerDto, req: any): Promise<{
-        admin: {
-            email: string;
-            name: string | null;
-            id: string;
-        } | null;
         meetings: {
             id: string;
             createdAt: Date;
@@ -23,12 +18,17 @@ export declare class CustomersController {
             agentTimezone: string | null;
             customerId: string;
         }[];
+        admin: {
+            email: string;
+            id: string;
+            name: string | null;
+        } | null;
     } & {
         email: string;
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
@@ -37,11 +37,6 @@ export declare class CustomersController {
         level: string;
     }>;
     findAll(req: any): Promise<({
-        admin: {
-            email: string;
-            name: string | null;
-            id: string;
-        } | null;
         meetings: {
             id: string;
             createdAt: Date;
@@ -55,12 +50,17 @@ export declare class CustomersController {
             agentTimezone: string | null;
             customerId: string;
         }[];
+        admin: {
+            email: string;
+            id: string;
+            name: string | null;
+        } | null;
     } & {
         email: string;
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
@@ -69,11 +69,6 @@ export declare class CustomersController {
         level: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
-        admin: {
-            email: string;
-            name: string | null;
-            id: string;
-        } | null;
         meetings: {
             id: string;
             createdAt: Date;
@@ -87,12 +82,17 @@ export declare class CustomersController {
             agentTimezone: string | null;
             customerId: string;
         }[];
+        admin: {
+            email: string;
+            id: string;
+            name: string | null;
+        } | null;
     } & {
         email: string;
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
@@ -101,11 +101,6 @@ export declare class CustomersController {
         level: string;
     }>;
     update(id: string, updateCustomerDto: UpdateCustomerDto, req: any): Promise<{
-        admin: {
-            email: string;
-            name: string | null;
-            id: string;
-        } | null;
         meetings: {
             id: string;
             createdAt: Date;
@@ -119,12 +114,17 @@ export declare class CustomersController {
             agentTimezone: string | null;
             customerId: string;
         }[];
+        admin: {
+            email: string;
+            id: string;
+            name: string | null;
+        } | null;
     } & {
         email: string;
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
@@ -134,10 +134,10 @@ export declare class CustomersController {
     }>;
     remove(id: string, req: any): Promise<{
         email: string;
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;

@@ -12,15 +12,23 @@ export function getClientMeetingConfirmationTemplate(meeting: any): {
 
   // Add logo
   const projectRoot = process.cwd();
-  const logoPath = path.join(
-    projectRoot,
-    'src',
-    'images',
-    'intellagent_logo_png.png',
-  );
-  let logoUrl = `${baseUrl}/logo/intellagent_logo_png.png`;
+  const possiblePaths = [
+    path.join(projectRoot, 'src', 'images', 'intellagent_logo.png'),
+    path.join(projectRoot, 'dist', 'images', 'intellagent_logo.png'),
+    path.join(projectRoot, 'images', 'intellagent_logo.png'),
+  ];
 
-  if (fs.existsSync(logoPath)) {
+  let logoPath: string | null = null;
+  for (const possiblePath of possiblePaths) {
+    if (fs.existsSync(possiblePath)) {
+      logoPath = possiblePath;
+      break;
+    }
+  }
+
+  let logoUrl = `${baseUrl}/logo/intellagent_logo.png`;
+
+  if (logoPath) {
     attachments.push({
       filename: 'intellagent-logo.png',
       path: logoPath,

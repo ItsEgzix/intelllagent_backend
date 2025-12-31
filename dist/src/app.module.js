@@ -10,7 +10,7 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
-const emails_module_1 = require("./emails/emails.module");
+const emails_module_1 = require("./newsletter/emails.module");
 const meetings_module_1 = require("./meetings/meetings.module");
 const auth_module_1 = require("./auth/auth.module");
 const agents_module_1 = require("./agents/agents.module");
@@ -18,6 +18,7 @@ const chatbot_module_1 = require("./chatbot/chatbot.module");
 const customers_module_1 = require("./customers/customers.module");
 const translations_module_1 = require("./translations/translations.module");
 const cloudinary_module_1 = require("./cloudinary/cloudinary.module");
+const settings_module_1 = require("./settings/settings.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -32,6 +33,7 @@ exports.AppModule = AppModule = __decorate([
             customers_module_1.CustomersModule,
             translations_module_1.TranslationsModule,
             cloudinary_module_1.CloudinaryModule,
+            settings_module_1.SettingsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

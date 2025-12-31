@@ -3,4 +3,5 @@ export type * from './models/Customer';
 export type * from './models/Meeting';
 export type * from './models/User';
 export type * from './models/Translation';
+export type * from './models/Setting';
 export type * from './commonInputTypes';

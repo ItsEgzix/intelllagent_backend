@@ -325,10 +325,12 @@ export class AgentsService {
       meetings.map((m) => m.agentTime).filter((t) => t !== null),
     );
 
-    // Generate all possible time slots in agent's timezone (9 AM - 5 PM, excluding 2 PM)
+    // Generate all possible time slots in agent's timezone (9 AM - 5 PM, excluding 1 PM - 2 PM lunch break)
+    // Aligned with validateWorkingHours which allows 8:30-17:30 but excludes 13:00-14:00
+    // We generate hourly slots from 9 AM to 5 PM, excluding 1 PM and 2 PM
     const allAgentSlots: string[] = [];
     for (let hour = 9; hour <= 17; hour++) {
-      if (hour === 14) continue; // Skip 2 PM (lunch break)
+      if (hour === 13 || hour === 14) continue; // Skip 1 PM and 2 PM (lunch break)
       const timeStr = `${String(hour).padStart(2, '0')}:00`;
       allAgentSlots.push(timeStr);
     }

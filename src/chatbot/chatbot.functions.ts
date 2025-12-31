@@ -7,6 +7,8 @@ import {
   findAgentByNameOrEmail,
   calculateTimeDifference,
 } from './chatbot.validators';
+import { GEMINI_CONFIG } from './chatbot.config';
+import { retryWithBackoff } from './chatbot.utils';
 
 /**
  * Services required for function execution
@@ -210,16 +212,6 @@ export async function scheduleMeeting(
       return 'Invalid email format.';
     }
 
-    // Validate working hours
-    const workingHoursValidation = validateWorkingHours(
-      params.date,
-      params.time,
-      params.timezone,
-    );
-    if (!workingHoursValidation.valid) {
-      return workingHoursValidation.message || 'Invalid working hours.';
-    }
-
     // Resolve agent ID - prioritize agentId, then agentName
     let agentId: string | undefined = params.agentId;
 
@@ -239,27 +231,42 @@ export async function scheduleMeeting(
       return 'An agent must be selected for the meeting. Please use list_agents to see available agents and specify which agent you want to schedule with.';
     }
 
-    // Verify agent exists
+    // Verify agent exists and get their timezone
+    let agentForCheck;
     try {
-      await services.agentsService.findOne(agentId);
+      agentForCheck = await services.agentsService.findOne(agentId);
     } catch (error) {
       return `Agent not found. Please use list_agents to see available agents.`;
     }
 
-    // Mock meeting creation for automation demo
-    // We don't want to actually create the meeting here because the frontend automation
-    // will fill the form and submit it, which will call the API to create the meeting.
-    // If we create it here, the frontend submission will fail with a conflict.
+    if (!agentForCheck.timezone) {
+      return 'Agent timezone is not set. Cannot schedule meeting.';
+    }
 
-    // Just validate availability one last time to be sure
-    // Convert customer time to agent timezone for availability check
-    const agentForCheck = await services.agentsService.findOne(agentId);
+    // Convert customer time to agent timezone for validation
     const { date: agentDate, time: agentTime } = convertTimezone(
       params.date,
       params.time,
       params.timezone,
-      agentForCheck.timezone || 'UTC',
+      agentForCheck.timezone,
     );
+
+    // Validate working hours in AGENT's timezone (not customer's)
+    // This ensures the agent is actually working at that time
+    const workingHoursValidation = validateWorkingHours(
+      agentDate,
+      agentTime,
+      agentForCheck.timezone,
+    );
+    if (!workingHoursValidation.valid) {
+      const timeDiff = calculateTimeDifference(
+        params.date,
+        params.time,
+        params.timezone,
+        agentForCheck.timezone,
+      );
+      return `The selected time is outside agent working hours. In the agent's timezone (${agentForCheck.timezone}), this would be ${agentDate} at ${agentTime}. ${workingHoursValidation.message} ${timeDiff}`;
+    }
 
     const isAvailable = await services.agentsService.isAgentAvailable(
       agentId,
@@ -379,44 +386,18 @@ ${JSON.stringify(sourceData, null, 2)}
 Return the translated JSON:`;
 
     try {
-      // Helper function for retry with exponential backoff
-      const retryWithBackoff = async <T>(
-        fn: () => Promise<T>,
-        maxRetries: number = 3,
-        initialDelay: number = 1000,
-      ): Promise<T> => {
-        let lastError: Error | unknown;
-        for (let attempt = 0; attempt < maxRetries; attempt++) {
-          try {
-            return await fn();
-          } catch (error) {
-            lastError = error;
-            const isNetworkError =
-              error instanceof Error &&
-              (error.message.includes('fetch failed') ||
-                error.message.includes('ECONNREFUSED') ||
-                error.message.includes('ETIMEDOUT') ||
-                error.message.includes('ENOTFOUND'));
-
-            if (isNetworkError && attempt < maxRetries - 1) {
-              const delay = initialDelay * Math.pow(2, attempt);
-              console.warn(
-                `Translation: Network error on attempt ${attempt + 1}/${maxRetries}, retrying in ${delay}ms...`,
-              );
-              await new Promise((resolve) => setTimeout(resolve, delay));
-              continue;
-            }
-            throw error;
-          }
-        }
-        throw lastError;
-      };
-
-      const response = (await retryWithBackoff(() =>
-        genAI.models.generateContent({
-          model: 'gemini-2.0-flash',
-          contents: [{ role: 'user', parts: [{ text: translationPrompt }] }],
-        }),
+      const response = (await retryWithBackoff(
+        () =>
+          genAI.models.generateContent({
+            model: GEMINI_CONFIG.MODEL,
+            contents: [{ role: 'user', parts: [{ text: translationPrompt }] }],
+          }),
+        {
+          maxRetries: GEMINI_CONFIG.RETRY.MAX_RETRIES,
+          initialDelay: GEMINI_CONFIG.RETRY.INITIAL_DELAY,
+          maxDelay: GEMINI_CONFIG.RETRY.MAX_DELAY,
+          context: 'Translation',
+        },
       )) as any;
 
       let translatedText = '';

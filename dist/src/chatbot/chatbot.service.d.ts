@@ -9,6 +9,10 @@ export declare class ChatbotService implements OnModuleInit {
     private genAI;
     private sessions;
     private ragContext;
+    private requestQueue;
+    private isProcessingQueue;
+    private lastRequestTime;
+    private readonly MIN_REQUEST_INTERVAL;
     constructor(meetingsService: MeetingsService, agentsService: AgentsService, translationsService: TranslationsService);
     onModuleInit(): Promise<void>;
     private loadRAGContext;
@@ -16,7 +20,8 @@ export declare class ChatbotService implements OnModuleInit {
     private getFunctionDisplayName;
     private processResponseRecursively;
     private generateSessionId;
-    private retryWithBackoff;
+    private throttleRequest;
+    private processQueue;
     sendMessage(message: string, sessionId?: string): Promise<{
         response: string;
         sessionId: string;

@@ -6,14 +6,14 @@ export declare class EmailsService {
     private emailService;
     constructor(prisma: PrismaService, emailService: EmailService);
     create(createEmailDto: CreateEmailDto): Promise<{
-        email: string;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
     findAll(): Promise<{
-        email: string;
         id: string;
+        email: string;
         createdAt: Date;
         updatedAt: Date;
     }[]>;
