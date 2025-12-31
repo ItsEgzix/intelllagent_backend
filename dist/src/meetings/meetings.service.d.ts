@@ -11,11 +11,11 @@ export declare class MeetingsService {
     constructor(prisma: PrismaService, emailService: EmailService, agentsService: AgentsService, settingsService: SettingsService);
     create(createMeetingDto: CreateMeetingDto): Promise<{
         customer: {
-            name: string;
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             phone: string;
             timezone: string;
             companyDetails: string | null;
@@ -24,22 +24,23 @@ export declare class MeetingsService {
             level: string;
         };
         agent: {
-            name: string | null;
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string | null;
             timezone: string | null;
-            password: string;
-            role: string;
-            isAgent: boolean;
             avatar: string | null;
             isActive: boolean;
+            isAgent: boolean;
+            password: string;
+            role: string;
         } | null;
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        agentId: string | null;
         customerDate: string;
         customerTime: string;
         customerTimezone: string;
@@ -47,22 +48,21 @@ export declare class MeetingsService {
         agentTime: string | null;
         agentTimezone: string | null;
         customerId: string;
-        agentId: string | null;
     }>;
     private validateNotPastDateTime;
     findAll(adminId?: string): Promise<({
         customer: {
             admin: {
-                name: string | null;
-                id: string;
                 email: string;
+                id: string;
+                name: string | null;
             } | null;
         } & {
-            name: string;
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             phone: string;
             timezone: string;
             companyDetails: string | null;
@@ -71,22 +71,23 @@ export declare class MeetingsService {
             level: string;
         };
         agent: {
-            name: string | null;
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string | null;
             timezone: string | null;
-            password: string;
-            role: string;
-            isAgent: boolean;
             avatar: string | null;
             isActive: boolean;
+            isAgent: boolean;
+            password: string;
+            role: string;
         } | null;
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        agentId: string | null;
         customerDate: string;
         customerTime: string;
         customerTimezone: string;
@@ -94,7 +95,6 @@ export declare class MeetingsService {
         agentTime: string | null;
         agentTimezone: string | null;
         customerId: string;
-        agentId: string | null;
     })[]>;
     private sendMeetingEmails;
 }

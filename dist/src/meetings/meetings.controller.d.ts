@@ -5,11 +5,11 @@ export declare class MeetingsController {
     constructor(meetingsService: MeetingsService);
     create(createMeetingDto: CreateMeetingDto): Promise<{
         customer: {
-            name: string;
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             phone: string;
             timezone: string;
             companyDetails: string | null;
@@ -18,22 +18,23 @@ export declare class MeetingsController {
             level: string;
         };
         agent: {
-            name: string | null;
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string | null;
             timezone: string | null;
-            password: string;
-            role: string;
-            isAgent: boolean;
             avatar: string | null;
             isActive: boolean;
+            isAgent: boolean;
+            password: string;
+            role: string;
         } | null;
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        agentId: string | null;
         customerDate: string;
         customerTime: string;
         customerTimezone: string;
@@ -41,21 +42,20 @@ export declare class MeetingsController {
         agentTime: string | null;
         agentTimezone: string | null;
         customerId: string;
-        agentId: string | null;
     }>;
     findAll(req: any): Promise<({
         customer: {
             admin: {
-                name: string | null;
-                id: string;
                 email: string;
+                id: string;
+                name: string | null;
             } | null;
         } & {
-            name: string;
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             phone: string;
             timezone: string;
             companyDetails: string | null;
@@ -64,22 +64,23 @@ export declare class MeetingsController {
             level: string;
         };
         agent: {
-            name: string | null;
-            id: string;
             email: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string | null;
             timezone: string | null;
-            password: string;
-            role: string;
-            isAgent: boolean;
             avatar: string | null;
             isActive: boolean;
+            isAgent: boolean;
+            password: string;
+            role: string;
         } | null;
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        agentId: string | null;
         customerDate: string;
         customerTime: string;
         customerTimezone: string;
@@ -87,6 +88,5 @@ export declare class MeetingsController {
         agentTime: string | null;
         agentTimezone: string | null;
         customerId: string;
-        agentId: string | null;
     })[]>;
 }
