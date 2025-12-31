@@ -13,9 +13,9 @@ export declare class AuthService {
         access_token: string;
         user: {
             email: string;
+            name: string | null;
             id: string;
             createdAt: Date;
-            name: string | null;
             role: string;
         };
     }>;
@@ -35,9 +35,9 @@ export declare class AuthService {
     }>;
     validateUser(userId: string): Promise<{
         email: string;
+        name: string | null;
         id: string;
         createdAt: Date;
-        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -46,10 +46,10 @@ export declare class AuthService {
     }>;
     findAllUsers(): Promise<{
         email: string;
+        name: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -58,10 +58,10 @@ export declare class AuthService {
     }[]>;
     updateUser(id: string, updateUserDto: UpdateUserDto): Promise<{
         email: string;
+        name: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;

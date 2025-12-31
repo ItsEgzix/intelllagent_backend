@@ -6,10 +6,10 @@ export declare class AgentsController {
     constructor(agentsService: AgentsService);
     findActive(): Promise<{
         email: string;
+        name: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -18,10 +18,10 @@ export declare class AgentsController {
     }[]>;
     create(createAgentDto: CreateAgentDto): Promise<{
         email: string;
+        name: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -30,10 +30,10 @@ export declare class AgentsController {
     }>;
     findAll(): Promise<{
         email: string;
+        name: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -42,10 +42,10 @@ export declare class AgentsController {
     }[]>;
     findOne(id: string): Promise<{
         email: string;
+        name: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -54,10 +54,10 @@ export declare class AgentsController {
     }>;
     update(id: string, updateAgentDto: UpdateAgentDto): Promise<{
         email: string;
+        name: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -66,10 +66,10 @@ export declare class AgentsController {
     }>;
     remove(id: string): Promise<{
         email: string;
+        name: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;

@@ -8,10 +8,10 @@ export declare class MeetingsService {
     create(createMeetingDto: CreateMeetingDto): Promise<{
         customer: {
             email: string;
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             phone: string;
             timezone: string;
             companyDetails: string | null;
@@ -21,10 +21,10 @@ export declare class MeetingsService {
         };
         agent: {
             email: string;
+            name: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string | null;
             timezone: string | null;
             password: string;
             role: string;
@@ -36,6 +36,7 @@ export declare class MeetingsService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        agentId: string | null;
         customerDate: string;
         customerTime: string;
         customerTimezone: string;
@@ -43,21 +44,20 @@ export declare class MeetingsService {
         agentTime: string | null;
         agentTimezone: string | null;
         customerId: string;
-        agentId: string | null;
     }>;
     findAll(adminId?: string): Promise<({
         customer: {
             admin: {
                 email: string;
-                id: string;
                 name: string | null;
+                id: string;
             } | null;
         } & {
             email: string;
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             phone: string;
             timezone: string;
             companyDetails: string | null;
@@ -67,10 +67,10 @@ export declare class MeetingsService {
         };
         agent: {
             email: string;
+            name: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string | null;
             timezone: string | null;
             password: string;
             role: string;
@@ -82,6 +82,7 @@ export declare class MeetingsService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        agentId: string | null;
         customerDate: string;
         customerTime: string;
         customerTimezone: string;
@@ -89,7 +90,6 @@ export declare class MeetingsService {
         agentTime: string | null;
         agentTimezone: string | null;
         customerId: string;
-        agentId: string | null;
     })[]>;
     private sendMeetingEmails;
 }

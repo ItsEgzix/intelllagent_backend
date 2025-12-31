@@ -5,9 +5,9 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider        = "prisma-client" // or `prisma-client-js`
+  provider        = "prisma-client"
   output          = "../generated/prisma"
-  engineType      = "client" // enable Prisma ORM without Rust
+  engineType      = "client"
   previewFeatures = []
 }
 

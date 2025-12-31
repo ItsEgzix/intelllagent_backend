@@ -7,13 +7,14 @@ export declare class CustomersController {
     create(createCustomerDto: CreateCustomerDto, req: any): Promise<{
         admin: {
             email: string;
-            id: string;
             name: string | null;
+            id: string;
         } | null;
         meetings: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            agentId: string | null;
             customerDate: string;
             customerTime: string;
             customerTimezone: string;
@@ -21,14 +22,13 @@ export declare class CustomersController {
             agentTime: string | null;
             agentTimezone: string | null;
             customerId: string;
-            agentId: string | null;
         }[];
     } & {
         email: string;
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
@@ -39,13 +39,14 @@ export declare class CustomersController {
     findAll(req: any): Promise<({
         admin: {
             email: string;
-            id: string;
             name: string | null;
+            id: string;
         } | null;
         meetings: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            agentId: string | null;
             customerDate: string;
             customerTime: string;
             customerTimezone: string;
@@ -53,14 +54,13 @@ export declare class CustomersController {
             agentTime: string | null;
             agentTimezone: string | null;
             customerId: string;
-            agentId: string | null;
         }[];
     } & {
         email: string;
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
@@ -71,13 +71,14 @@ export declare class CustomersController {
     findOne(id: string, req: any): Promise<{
         admin: {
             email: string;
-            id: string;
             name: string | null;
+            id: string;
         } | null;
         meetings: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            agentId: string | null;
             customerDate: string;
             customerTime: string;
             customerTimezone: string;
@@ -85,14 +86,13 @@ export declare class CustomersController {
             agentTime: string | null;
             agentTimezone: string | null;
             customerId: string;
-            agentId: string | null;
         }[];
     } & {
         email: string;
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
@@ -103,13 +103,14 @@ export declare class CustomersController {
     update(id: string, updateCustomerDto: UpdateCustomerDto, req: any): Promise<{
         admin: {
             email: string;
-            id: string;
             name: string | null;
+            id: string;
         } | null;
         meetings: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            agentId: string | null;
             customerDate: string;
             customerTime: string;
             customerTimezone: string;
@@ -117,14 +118,13 @@ export declare class CustomersController {
             agentTime: string | null;
             agentTimezone: string | null;
             customerId: string;
-            agentId: string | null;
         }[];
     } & {
         email: string;
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;
@@ -134,10 +134,10 @@ export declare class CustomersController {
     }>;
     remove(id: string, req: any): Promise<{
         email: string;
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         timezone: string;
         companyDetails: string | null;

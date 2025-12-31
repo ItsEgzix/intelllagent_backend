@@ -10,9 +10,9 @@ export declare class AuthController {
         access_token: string;
         user: {
             email: string;
+            name: string | null;
             id: string;
             createdAt: Date;
-            name: string | null;
             role: string;
         };
     }>;
@@ -36,10 +36,10 @@ export declare class AuthController {
     getProfile(req: any): Promise<any>;
     getAllUsers(): Promise<{
         email: string;
+        name: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
@@ -48,10 +48,10 @@ export declare class AuthController {
     }[]>;
     updateUser(id: string, body: any, req: any, file?: any): Promise<{
         email: string;
+        name: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string | null;
         timezone: string | null;
         role: string;
         isAgent: boolean;
